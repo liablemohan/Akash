@@ -3,10 +3,7 @@
 .AppleDouble
 .LSOverride
 
-# Frame directories (thousands of images — too large for git/GitHub)
-frames/
-frames_jpg/
-frames_webp/
+
 
 # Python cache
 __pycache__/
