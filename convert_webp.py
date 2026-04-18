@@ -1,8 +1,7 @@
 """
-Option C: Thin frames (every 2nd) + convert to WebP
-  Source:  frames_jpg/out_0001.jpg … out_8511.jpg  (8511 frames)
-  Keep:    every 2nd → frames 1, 3, 5 … 8511       (4256 frames)
-  Output:  frames_webp/out_0001.webp … out_4256.webp
+Convert all PNG frames to WebP (1:1, no thinning)
+  Source:  frames/out_0001.png … out_8511.png  (8511 frames)
+  Output:  frames_webp/out_0001.webp … out_8511.webp
   Quality: 78 (good balance of size vs visual quality)
 """
 
@@ -10,22 +9,20 @@ import os, sys, time
 from PIL import Image
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-SRC_DIR   = "frames_jpg"
+SRC_DIR   = "frames"
 DST_DIR   = "frames_webp"
 QUALITY   = 78          # WebP quality (0–100)
 N_WORKERS = 8           # parallel threads
-STEP      = 2           # keep every Nth source frame
 
 os.makedirs(DST_DIR, exist_ok=True)
 
-# Build list of (dst_index, src_filename) pairs
-src_indices = range(1, 8512, STEP)   # 1, 3, 5 … 8511
+# Build list of (index, src_filename) pairs — all frames 1:1
 pairs = [
-    (dst_i, f"{SRC_DIR}/out_{src_i:04d}.jpg")
-    for dst_i, src_i in enumerate(src_indices, start=1)
+    (i, f"{SRC_DIR}/out_{i:04d}.png")
+    for i in range(1, 8512)
 ]
 total = len(pairs)
-print(f"Total frames to produce: {total}  (every {STEP}nd source frame)")
+print(f"Total frames to produce: {total}  (all frames, 1:1)")
 print(f"Output dir: {DST_DIR}/  quality={QUALITY}  workers={N_WORKERS}")
 print("-" * 50)
 

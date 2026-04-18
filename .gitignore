@@ -3,10 +3,10 @@
 .AppleDouble
 .LSOverride
 
-# Frame directories (thousands of images — too large for git/GitHub)
+# Frame directories (too large for git/GitHub)
 frames/
 frames_jpg/
-frames_webp/
+# frames_webp/ — tracked (all files <200 KB, 917 MB total, pushed to GitHub)
 
 # Python cache
 __pycache__/

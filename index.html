@@ -412,20 +412,20 @@
      CONFIGURATION
   ════════════════════════════════════════════════════════ */
   const CONFIG = {
-    totalFrames:   4256,          // every 2nd source frame → 8511÷2
+    totalFrames:   8511,          // all source frames, 1:1 from frames_webp
 
-    // Format preference order: webp → jpg → png
+    // Primary format: webp (frames_webp/), fallback: png (frames/)
     frameExt:    'webp',
     frameDir:    'frames_webp',
 
     framePath: (n, ext, dir) =>
       `${dir}/out_${String(n).padStart(4,'0')}.${ext}`,
 
-    scrollPerFrame: 16,           // 16px/frame keeps same total scroll height as before
+    scrollPerFrame: 8,            // halved so total scroll height stays the same
     scrubLag:       0.5,
 
     // Progressive loading tuning
-    quickStart:    60,            // frames before site reveals (faster with WebP)
+    quickStart:    60,            // frames before site reveals
     nWorkers:      8,             // parallel background loaders
     lookahead:     200,           // frames to pre-load ahead of scroll position
 
@@ -532,18 +532,9 @@
   }
 
   /* ════════════════════════════════════════════════════════
-     FRAME LOADER — probe extension with fallback chain
-     webp → jpg → png
+     FRAME LOADER — direct WebP (all 8511 files confirmed present)
   ════════════════════════════════════════════════════════ */
-  function makeFrameSrc(n) {
-    return CONFIG.framePath(n, frameExt, frameDir);
-  }
-
-  // Try loading a single image with an ordered fallback chain
-  function loadWithFallback(index, srcList, onDone) {
-    if (!srcList.length) { frames[index] = null; onDone(index); return; }
-    const src = srcList[0];
-    const rest = srcList.slice(1);
+  function loadWithFallback(index, frameNumber, onDone) {
     const img = new Image();
     img.onload = () => {
       frames[index] = img;
@@ -551,45 +542,16 @@
       if (index === 0 && siteRevealed) paintImage(img);
       onDone(index);
     };
-    img.onerror = () => loadWithFallback(index, rest, onDone);
-    img.src = src;
-  }
-
-  function getFallbackSrcs(frameNumber) {
-    // frameNumber is 1-based file number
-    return [
-      CONFIG.framePath(frameNumber, 'webp', 'frames_webp'),
-      CONFIG.framePath(frameNumber, 'jpg',  'frames_jpg'),
-      CONFIG.framePath(frameNumber, 'png',  'frames'),
-    ];
+    img.onerror = () => { frames[index] = null; onDone(index); };
+    img.src = CONFIG.framePath(frameNumber, 'webp', 'frames_webp');
   }
 
   /* ════════════════════════════════════════════════════════
      PHASE 1 — Quick-start: load first N frames → reveal site
   ════════════════════════════════════════════════════════ */
   function probeThenQuickStart() {
-    // Probe best available format: webp → jpg → png
-    const tryWebp = new Image();
-    tryWebp.onload = () => {
-      frameExt = 'webp'; frameDir = 'frames_webp';
-      loaderPhase.textContent = 'Opening the ghats…';
-      runQuickStart();
-    };
-    tryWebp.onerror = () => {
-      const tryJpg = new Image();
-      tryJpg.onload = () => {
-        frameExt = 'jpg'; frameDir = 'frames_jpg';
-        loaderPhase.textContent = 'Loading JPEG frames…';
-        runQuickStart();
-      };
-      tryJpg.onerror = () => {
-        frameExt = 'png'; frameDir = 'frames';
-        loaderPhase.textContent = 'Loading PNG frames (conversion pending)…';
-        runQuickStart();
-      };
-      tryJpg.src = CONFIG.framePath(1, 'jpg', 'frames_jpg') + '?probe=1';
-    };
-    tryWebp.src = CONFIG.framePath(1, 'webp', 'frames_webp') + '?probe=1';
+    loaderPhase.textContent = 'Opening the ghats…';
+    runQuickStart();
   }
 
   function runQuickStart() {
@@ -598,8 +560,7 @@
 
     for (let i = 0; i < N; i++) {
       const idx = i;
-      // Use fallback chain for every frame in quick-start
-      loadWithFallback(idx, getFallbackSrcs(i + 1), () => {
+      loadWithFallback(idx, i + 1, () => {
         done++;
         const pct = (done / N) * 100;
         progressFill.style.width = pct + '%';
@@ -639,7 +600,7 @@
       const i = next++;
       if (frames[i]) { worker(); return; }  // skip already-loaded
 
-      loadWithFallback(i, getFallbackSrcs(i + 1), () => {
+      loadWithFallback(i, i + 1, () => {
         // Update buffer bar
         const pct = (totalLoaded / total) * 100;
         bufferBar.style.width = pct + '%';
@@ -667,9 +628,8 @@
       const end = Math.min(idx + CONFIG.lookahead, CONFIG.totalFrames);
       for (let i = idx; i < end; i++) {
         if (!frames[i]) {
-          // Capture i to avoid closure issue
           ((captured) => {
-            loadWithFallback(captured, getFallbackSrcs(captured + 1), () => {});
+            loadWithFallback(captured, captured + 1, () => {});
           })(i);
         }
       }
