@@ -1,724 +1,171 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>काशी — The Eternal City · A Journey Along the Ghats</title>
-  <meta name="description" content="A cinematic scroll journey through the sacred ghats of Varanasi — Dashashwamedh, Manikarnika, Assi, Harishchandra, and Scindia — where the Ganga meets eternity." />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Kashi – Eternal City: An immersive 3D heritage journey through Varanasi's Vishwanath Temple Corridor. Where Heritage Meets Living Data.">
+  <title>Kashi — Eternal City</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
 
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Noto+Serif+Devanagari:wght@300;400;500&display=swap" rel="stylesheet" />
-
-  <!-- GSAP + ScrollTrigger -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-
-  <style>
-    /* ─── Reset & Base ─── */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --gold:       #C8973A;
-      --parchment:  #F5ECD7;
-      --ink:        rgba(10, 6, 2, 0.65);
-      --ink-solid:  #0A0602;
+  <!-- Three.js ES Module importmap -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three":          "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js",
+      "three/addons/":  "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"
     }
-
-    html { scroll-behavior: auto; }
-
-    body {
-      background: var(--ink-solid);
-      color: var(--parchment);
-      font-family: 'EB Garamond', Georgia, serif;
-      overflow-x: hidden;
-    }
-
-    /* ─── Loading Screen ─── */
-    #loader {
-      position: fixed;
-      inset: 0;
-      background: var(--ink-solid);
-      z-index: 9999;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 32px;
-      transition: opacity 0.9s ease;
-    }
-    #loader.hidden { opacity: 0; pointer-events: none; }
-
-    .loader-title {
-      font-family: 'Noto Serif Devanagari', serif;
-      font-size: clamp(56px, 10vw, 108px);
-      color: var(--parchment);
-      letter-spacing: 0.04em;
-      font-weight: 300;
-    }
-
-    .loader-subtitle {
-      font-family: 'EB Garamond', serif;
-      font-size: 12px;
-      letter-spacing: 0.28em;
-      text-transform: uppercase;
-      color: var(--gold);
-      opacity: 0.75;
-    }
-
-    /* Phase label */
-    .loader-phase {
-      font-family: 'EB Garamond', serif;
-      font-size: 11px;
-      letter-spacing: 0.22em;
-      text-transform: uppercase;
-      color: rgba(245, 236, 215, 0.35);
-      min-height: 1em;
-      transition: opacity 0.3s;
-    }
-
-    .progress-track {
-      width: min(300px, 75vw);
-      height: 1px;
-      background: rgba(200, 151, 58, 0.18);
-      position: relative;
-      overflow: hidden;
-    }
-    .progress-fill {
-      position: absolute; top: 0; left: 0;
-      height: 100%; width: 0%;
-      background: var(--gold);
-      transition: width 0.15s linear;
-    }
-
-    .progress-label {
-      font-family: 'EB Garamond', serif;
-      font-size: 11px;
-      letter-spacing: 0.18em;
-      color: rgba(245, 236, 215, 0.3);
-      text-transform: uppercase;
-    }
-
-    /* ─── Buffer Bar (bottom edge — shows bg load after reveal) ─── */
-    #buffer-bar {
-      position: fixed;
-      bottom: 0; left: 0;
-      width: 0%;
-      height: 2px;
-      background: rgba(200, 151, 58, 0.45);
-      z-index: 120;
-      pointer-events: none;
-      transition: width 0.2s linear, opacity 0.5s ease;
-    }
-    #buffer-bar.complete { opacity: 0; }
-
-    /* ─── Scroll Progress Bar (top-right vertical) ─── */
-    #scroll-progress {
-      position: fixed;
-      top: 0; right: 0;
-      width: 2px; height: 100vh;
-      background: rgba(200, 151, 58, 0.1);
-      z-index: 200;
-      pointer-events: none;
-    }
-    #scroll-progress-fill {
-      width: 100%; height: 0%;
-      background: var(--gold);
-    }
-
-    /* ─── Canvas ─── */
-    #main-canvas {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      display: block;
-      will-change: transform;
-      z-index: 1;
-    }
-
-    /* ─── Canvas Container (scroll driver) ─── */
-    #canvas-container { position: relative; }
-
-    /* ─── Hero Overlay ─── */
-    #hero-overlay {
-      position: fixed; inset: 0;
-      z-index: 10;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      pointer-events: none;
-      transition: opacity 0.6s ease;
-    }
-    #hero-overlay.hidden { opacity: 0; pointer-events: none; }
-
-    .hero-kashi {
-      font-family: 'Noto Serif Devanagari', serif;
-      font-size: clamp(72px, 14vw, 160px);
-      font-weight: 300;
-      color: var(--parchment);
-      letter-spacing: 0.06em;
-      line-height: 1;
-      text-shadow: 0 2px 40px rgba(0,0,0,0.6);
-    }
-    .hero-subtitle {
-      font-family: 'EB Garamond', serif;
-      font-size: clamp(12px, 1.6vw, 17px);
-      letter-spacing: 0.28em;
-      text-transform: uppercase;
-      color: var(--gold);
-      margin-top: 20px;
-      opacity: 0.9;
-    }
-    .hero-rule {
-      width: 48px; height: 1px;
-      background: var(--gold);
-      margin: 24px auto 0;
-      opacity: 0.5;
-    }
-
-    /* ─── Scroll Prompt ─── */
-    .scroll-prompt {
-      position: absolute;
-      bottom: 52px; left: 50%;
-      transform: translateX(-50%);
-      display: flex; flex-direction: column;
-      align-items: center; gap: 10px;
-      pointer-events: none;
-    }
-    .scroll-prompt-text {
-      font-family: 'EB Garamond', serif;
-      font-size: 10px;
-      letter-spacing: 0.32em;
-      text-transform: uppercase;
-      color: rgba(245, 236, 215, 0.45);
-    }
-    .scroll-arrow {
-      width: 1px; height: 38px;
-      background: linear-gradient(to bottom, var(--gold), transparent);
-      animation: pulse-down 2s ease-in-out infinite;
-    }
-    @keyframes pulse-down {
-      0%, 100% { transform: scaleY(1); opacity: 0.65; }
-      50%       { transform: scaleY(1.4); opacity: 1; }
-    }
-
-    /* ─── Ghat Overlays ─── */
-    .ghat-overlay {
-      position: fixed;
-      bottom: 80px; left: 48px;
-      width: 360px;
-      z-index: 20;
-      opacity: 0;
-      transform: translateY(16px);
-      pointer-events: none;
-      will-change: opacity, transform;
-      background: var(--ink);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-      border-left: 1px solid var(--gold);
-      padding: 32px;
-    }
-
-    .ghat-sanskrit {
-      font-family: 'Noto Serif Devanagari', serif;
-      font-size: 12px;
-      font-weight: 400;
-      color: var(--gold);
-      letter-spacing: 0.1em;
-      margin-bottom: 10px;
-      opacity: 0.85;
-    }
-    .ghat-name {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(38px, 5vw, 66px);
-      font-weight: 300;
-      line-height: 1.05;
-      color: var(--parchment);
-      letter-spacing: 0.01em;
-      margin-bottom: 20px;
-    }
-    .ghat-rule {
-      width: 32px; height: 1px;
-      background: var(--gold);
-      opacity: 0.55;
-      margin-bottom: 18px;
-    }
-    .ghat-desc {
-      font-family: 'EB Garamond', serif;
-      font-size: 16px;
-      line-height: 1.7;
-      color: rgba(245, 236, 215, 0.75);
-      font-style: italic;
-    }
-
-    /* ─── Cinematic Vignette ─── */
-    #vignette {
-      position: fixed; inset: 0;
-      z-index: 5; pointer-events: none;
-      background: radial-gradient(ellipse at center,
-        transparent 50%,
-        rgba(2, 1, 0, 0.55) 100%);
-    }
-
-    /* ─── Buffering notice (brief flash when scroll outruns load) ─── */
-    #buffer-notice {
-      position: fixed;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 30;
-      font-family: 'EB Garamond', serif;
-      font-size: 11px;
-      letter-spacing: 0.26em;
-      text-transform: uppercase;
-      color: rgba(245, 236, 215, 0.5);
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease;
-    }
-    #buffer-notice.visible { opacity: 1; }
-
-    /* ─── End Credit ─── */
-    #end-credit {
-      position: relative; z-index: 30;
-      background: var(--ink-solid);
-      min-height: 100vh;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      gap: 28px; padding: 80px 40px; text-align: center;
-    }
-    .end-credit-kashi {
-      font-family: 'Noto Serif Devanagari', serif;
-      font-size: clamp(36px, 6vw, 72px);
-      font-weight: 300;
-      color: var(--parchment);
-      letter-spacing: 0.08em;
-    }
-    .end-credit-rule { width: 40px; height: 1px; background: var(--gold); opacity: 0.45; }
-    .end-credit-quote {
-      font-family: 'EB Garamond', serif;
-      font-size: clamp(15px, 1.8vw, 21px);
-      font-style: italic;
-      color: rgba(245, 236, 215, 0.55);
-      max-width: 480px; line-height: 1.75;
-    }
-    .end-credit-attribution {
-      font-family: 'EB Garamond', serif;
-      font-size: 11px;
-      letter-spacing: 0.26em;
-      text-transform: uppercase;
-      color: var(--gold);
-      opacity: 0.45;
-    }
-
-    /* ─── Responsive ─── */
-    @media (max-width: 600px) {
-      .ghat-overlay { left: 16px; right: 16px; width: auto; bottom: 40px; padding: 22px; }
-    }
-  </style>
+  }
+  </script>
 </head>
 <body>
 
-  <!-- ══════════ LOADER ══════════ -->
+  <!-- ── Phase 1: Pure CSS ASCII preloader (visible before any JS) ──────── -->
   <div id="loader">
-    <div class="loader-title">काशी</div>
-    <div class="loader-subtitle">The Eternal City</div>
-    <div class="progress-track">
-      <div class="progress-fill" id="progress-fill"></div>
-    </div>
-    <div class="loader-phase" id="loader-phase">Preparing the ghats…</div>
-    <div class="progress-label" id="progress-label"></div>
+    <div class="ascii"></div>
   </div>
 
-  <!-- ══════════ BUFFER BAR (bottom) ══════════ -->
-  <div id="buffer-bar"></div>
-  <div id="buffer-notice">Loading…</div>
+  <!-- ── SVG filter defs: chromatic aberration + film grain ────────────── -->
+  <svg class="defs" width="0" height="0" aria-hidden="true">
+    <defs>
+      <filter id="chromaticAberration" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
+        <feColorMatrix in="SourceGraphic" type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="r"/>
+        <feOffset in="r" dx="-0.8" dy="0" result="rOffset"/>
+        <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" result="g"/>
+        <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="b"/>
+        <feOffset in="b" dx="0.8" dy="0" result="bOffset"/>
+        <feComposite in="rOffset" in2="g" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" result="rg"/>
+        <feComposite in="rg" in2="bOffset" operator="arithmetic" k1="0" k2="1" k3="1" k4="0"/>
+      </filter>
+      <filter id="grainFilter">
+        <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="2" stitchTiles="stitch" result="noise"/>
+        <feColorMatrix in="noise" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0.05 0.05 0.05 0 0"/>
+      </filter>
+    </defs>
+  </svg>
 
-  <!-- ══════════ SCROLL PROGRESS (right edge) ══════════ -->
-  <div id="scroll-progress">
-    <div id="scroll-progress-fill"></div>
-  </div>
+  <main id="app">
 
-  <!-- ══════════ CANVAS ══════════ -->
-  <canvas id="main-canvas"></canvas>
+    <!-- ── Section 1: Hero Video ──────────────────────────────────────── -->
+    <section class="hero" id="hero" aria-label="Hero: Kashi the Eternal City">
+      <div class="hero-stage" id="heroStage">
+        <!--
+          loop attribute intentionally removed.
+          JS intercepts the first 'ended' event to trigger the 3D transition,
+          then re-loops the video during 3D scene display.
+        -->
+        <video
+          class="hero-video"
+          id="heroVideo"
+          src="assets/hero.mp4"
+          autoplay
+          muted
+          playsinline
+          preload="auto"
+        ></video>
+        <div class="vignette"></div>
+        <svg class="grain" id="grainOverlay" preserveAspectRatio="none" aria-hidden="true">
+          <rect width="100%" height="100%" filter="url(#grainFilter)"></rect>
+        </svg>
+      </div>
 
-  <!-- ══════════ VIGNETTE ══════════ -->
-  <div id="vignette"></div>
+      <div class="hero-copy">
+        <span class="eyebrow">Est. before time itself</span>
+        <h1 class="title">
+          <span class="line">Kashi</span>
+          <span class="line accent">the eternal city</span>
+        </h1>
+        <p class="subtitle">Where the Ganga carries fire, smoke, and twelve centuries of prayer past a skyline that has never stopped rising.</p>
+      </div>
 
-  <!-- ══════════ HERO OVERLAY ══════════ -->
-  <div id="hero-overlay">
-    <div class="hero-kashi">काशी</div>
-    <div class="hero-subtitle">The Eternal City · A Journey Along the Ghats</div>
-    <div class="hero-rule"></div>
-    <div class="scroll-prompt">
-      <div class="scroll-prompt-text">Scroll to journey</div>
-      <div class="scroll-arrow"></div>
-    </div>
-  </div>
+      <div class="scroll-cue" aria-hidden="true">
+        <span>Scroll</span>
+        <div class="scroll-line"><i></i></div>
+      </div>
 
-  <!-- ══════════ CANVAS CONTAINER (scroll driver) ══════════ -->
-  <div id="canvas-container"><!-- height set by JS --></div>
+      <!-- Skip-to-3D button: appears after 5s if video hasn't ended -->
+      <button
+        id="skip-to-3d"
+        aria-label="Skip to the interactive 3D heritage experience"
+      >Enter 3D Experience ↗</button>
+    </section>
 
-  <!-- ══════════ GHAT OVERLAYS ══════════ -->
-  <div class="ghat-overlay" id="ghat-0">
-    <div class="ghat-sanskrit">दशाश्वमेध घाट</div>
-    <div class="ghat-name">Dashashwamedh<br>Ghat</div>
-    <div class="ghat-rule"></div>
-    <div class="ghat-desc">Where Brahma himself performed the Dasha-ashwamedha yajna — the ten-horse sacrifice — to welcome Lord Shiva back to Kashi. Each evening, the Ganga Aarti transforms this stone into a stage for fire and devotion.</div>
-  </div>
+    <!-- ── Section 2: Interactive 3D Scene ───────────────────────────── -->
+    <section
+      id="scene-section"
+      aria-label="Interactive 3D Heritage Scene — Vishwanath Temple Corridor"
+    >
+      <!-- Three.js renders into this canvas -->
+      <canvas id="three-canvas"></canvas>
 
-  <div class="ghat-overlay" id="ghat-1">
-    <div class="ghat-sanskrit">मणिकर्णिका घाट</div>
-    <div class="ghat-name">Manikarnika<br>Ghat</div>
-    <div class="ghat-rule"></div>
-    <div class="ghat-desc">The great cremation ghat, where pyres have burned without pause for three thousand years. To die at Manikarnika is to receive moksha from Shiva's own lips — liberation from the endless cycle of birth and death.</div>
-  </div>
+      <!-- Loading / interaction hint text -->
+      <p id="scene-hint" aria-live="polite"></p>
 
-  <div class="ghat-overlay" id="ghat-2">
-    <div class="ghat-sanskrit">अस्सी घाट</div>
-    <div class="ghat-name">Assi<br>Ghat</div>
-    <div class="ghat-rule"></div>
-    <div class="ghat-desc">Where the river Assi surrenders herself into the Ganga at the southern boundary of sacred Kashi. The mornings here belong to the bathers and the birds; the evenings to pilgrims circling a Shivalinga beneath a peepal tree.</div>
-  </div>
+      <!-- Carousel navigation arrows — faded in after artifacts spawn -->
+      <button
+        id="carousel-prev"
+        class="carousel-arrow carousel-arrow--prev"
+        aria-label="Previous sacred object"
+        style="opacity:0"
+      >&#8592;</button>
 
-  <div class="ghat-overlay" id="ghat-3">
-    <div class="ghat-sanskrit">हरिश्चन्द्र घाट</div>
-    <div class="ghat-name">Harishchandra<br>Ghat</div>
-    <div class="ghat-rule"></div>
-    <div class="ghat-desc">Named for the legendary king who kept his word at every cost — who worked as a keeper of the dead rather than speak a single untruth. It is the older of Kashi's two burning ghats, and the more solitary.</div>
-  </div>
+      <button
+        id="carousel-next"
+        class="carousel-arrow carousel-arrow--next"
+        aria-label="Next sacred object"
+        style="opacity:0"
+      >&#8594;</button>
 
-  <div class="ghat-overlay" id="ghat-4">
-    <div class="ghat-sanskrit">सिन्धिया घाट</div>
-    <div class="ghat-name">Scindia<br>Ghat</div>
-    <div class="ghat-rule"></div>
-    <div class="ghat-desc">The tilting Shiva temple, half-submerged in the Ganga, stands as proof that even stone must bow to the river. Built by the Scindia dynasty and swallowed by the flood — still visited, still consecrated, still alive.</div>
-  </div>
+      <!-- ── Focused state: left content panel (PRD §12–13) ───────────── -->
+      <aside
+        id="content-panel"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="panel-title"
+      >
+        <!-- Close / back -->
+        <button id="panel-close" aria-label="Return to orbital view">
+          <span aria-hidden="true">←</span> Back
+        </button>
 
-  <!-- ══════════ END CREDIT ══════════ -->
-  <div id="end-credit">
-    <div class="end-credit-kashi">काशी</div>
-    <div class="end-credit-rule"></div>
-    <div class="end-credit-quote">
-      "Kashi is not a city. It is a crossing — a tirtha — where the visible and the invisible share the same street."
-    </div>
-    <div class="end-credit-attribution">The Eternal City · Varanasi · Since Time Immemorial</div>
-  </div>
+        <!-- Object identity -->
+        <header class="panel-header">
+          <div class="panel-icon" id="panel-icon" aria-hidden="true"></div>
+          <div class="panel-meta">
+            <p class="panel-category" id="panel-category">Sacred Object</p>
+            <h2 class="panel-title" id="panel-title"></h2>
+          </div>
+        </header>
 
+        <!-- Story / description -->
+        <p class="panel-story" id="panel-story"></p>
 
-  <script>
-  /* ════════════════════════════════════════════════════════
-     CONFIGURATION
-  ════════════════════════════════════════════════════════ */
-  const CONFIG = {
-    totalFrames:   8511,          // all source frames, 1:1 from frames_webp
+        <!-- Article cards (PRD §13 — Article List) -->
+        <div class="panel-articles" id="panel-articles" aria-label="Related content">
+          <!-- Injected by JS per artifact -->
+        </div>
+      </aside>
 
-    // Primary format: webp (frames_webp/), fallback: png (frames/)
-    frameExt:    'webp',
-    frameDir:    'frames_webp',
+      <!-- ── Focused state: right object label (PRD §10) ───────────────── -->
+      <div id="object-panel" aria-hidden="true">
+        <p class="object-label" id="object-label"></p>
+      </div>
 
-    framePath: (n, ext, dir) =>
-      `${dir}/out_${String(n).padStart(4,'0')}.${ext}`,
+    </section>
 
-    scrollPerFrame: 8,            // halved so total scroll height stays the same
-    scrubLag:       0.5,
+  </main>
 
-    // Progressive loading tuning
-    quickStart:    60,            // frames before site reveals
-    nWorkers:      8,             // parallel background loaders
-    lookahead:     200,           // frames to pre-load ahead of scroll position
+  <!-- ── GSAP (global, for main.js + scene.js) ─────────────────────────── -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 
-    sections: [
-      { id: 'ghat-0', startFraction: 0,   endFraction: 0.2 },
-      { id: 'ghat-1', startFraction: 0.2, endFraction: 0.4 },
-      { id: 'ghat-2', startFraction: 0.4, endFraction: 0.6 },
-      { id: 'ghat-3', startFraction: 0.6, endFraction: 0.8 },
-      { id: 'ghat-4', startFraction: 0.8, endFraction: 1.0 },
-    ]
-  };
+  <!-- ── Hero animations (preloader, scroll parallax, mouse tilt) ──────── -->
+  <script src="js/main.js"></script>
 
-  /* ════════════════════════════════════════════════════════
-     DOM REFS
-  ════════════════════════════════════════════════════════ */
-  const canvas          = document.getElementById('main-canvas');
-  const ctx             = canvas.getContext('2d');
-  const canvasContainer = document.getElementById('canvas-container');
-  const loader          = document.getElementById('loader');
-  const progressFill    = document.getElementById('progress-fill');
-  const progressLabel   = document.getElementById('progress-label');
-  const loaderPhase     = document.getElementById('loader-phase');
-  const heroOverlay     = document.getElementById('hero-overlay');
-  const scrollProgFill  = document.getElementById('scroll-progress-fill');
-  const bufferBar       = document.getElementById('buffer-bar');
-  const bufferNotice    = document.getElementById('buffer-notice');
+  <!-- ── 3D scene (ES module, auto-deferred) ───────────────────────────── -->
+  <script type="module" src="js/scene.js"></script>
 
-  /* ════════════════════════════════════════════════════════
-     STATE
-  ════════════════════════════════════════════════════════ */
-  const frames          = new Array(CONFIG.totalFrames).fill(null);
-  let currentFrameIdx   = 0;
-  let lastDrawnIdx      = -1;
-  let rafPending        = false;
-  let totalLoaded       = 0;
-  let siteRevealed      = false;
-  let bufferNoticeTimer = null;
-
-  /* Detect which file extension actually exists (probe frame 1) */
-  let frameExt = CONFIG.frameExt;
-  let frameDir = CONFIG.frameDir;
-
-  /* ════════════════════════════════════════════════════════
-     CANVAS SIZING
-  ════════════════════════════════════════════════════════ */
-  function resizeCanvas() {
-    canvas.width  = window.innerWidth;
-    canvas.height = window.innerHeight;
-  }
-  resizeCanvas();
-
-  /* ════════════════════════════════════════════════════════
-     DRAW — object-fit: cover with dirty flag + RAF
-  ════════════════════════════════════════════════════════ */
-  function paintImage(img) {
-    if (!img || !img.complete || img.naturalWidth === 0) return;
-    const cw = canvas.width,  ch = canvas.height;
-    const iw = img.naturalWidth, ih = img.naturalHeight;
-    const cr = cw / ch, ir = iw / ih;
-    let sx, sy, sw, sh;
-    if (ir > cr) { sh = ih; sw = ih * cr; sx = (iw - sw) / 2; sy = 0; }
-    else          { sw = iw; sh = iw / cr; sx = 0; sy = (ih - sh) / 2; }
-    ctx.drawImage(img, sx, sy, sw, sh, 0, 0, cw, ch);
-  }
-
-  /* Nearest-available fallback */
-  function getBestFrame(idx) {
-    if (frames[idx]) return frames[idx];
-    for (let d = 1; d < 120; d++) {
-      if (idx - d >= 0              && frames[idx - d]) return frames[idx - d];
-      if (idx + d < CONFIG.totalFrames && frames[idx + d]) return frames[idx + d];
-    }
-    return null;
-  }
-
-  function requestDraw() {
-    if (rafPending) return;
-    rafPending = true;
-    requestAnimationFrame(() => {
-      rafPending = false;
-      if (currentFrameIdx !== lastDrawnIdx) {
-        lastDrawnIdx = currentFrameIdx;
-        const img = getBestFrame(currentFrameIdx);
-        if (img) {
-          paintImage(img);
-          hidBufferNotice();
-        } else {
-          showBufferNotice();
-        }
-      }
-    });
-  }
-
-  /* ════════════════════════════════════════════════════════
-     BUFFER NOTICE (appears when scroll outruns load)
-  ════════════════════════════════════════════════════════ */
-  function showBufferNotice() {
-    clearTimeout(bufferNoticeTimer);
-    bufferNotice.classList.add('visible');
-  }
-  function hidBufferNotice() {
-    clearTimeout(bufferNoticeTimer);
-    bufferNoticeTimer = setTimeout(() => bufferNotice.classList.remove('visible'), 200);
-  }
-
-  /* ════════════════════════════════════════════════════════
-     FRAME LOADER — direct WebP (all 8511 files confirmed present)
-  ════════════════════════════════════════════════════════ */
-  function loadWithFallback(index, frameNumber, onDone) {
-    const img = new Image();
-    img.onload = () => {
-      frames[index] = img;
-      totalLoaded++;
-      if (index === 0 && siteRevealed) paintImage(img);
-      onDone(index);
-    };
-    img.onerror = () => { frames[index] = null; onDone(index); };
-    img.src = CONFIG.framePath(frameNumber, 'webp', 'frames_webp');
-  }
-
-  /* ════════════════════════════════════════════════════════
-     PHASE 1 — Quick-start: load first N frames → reveal site
-  ════════════════════════════════════════════════════════ */
-  function probeThenQuickStart() {
-    loaderPhase.textContent = 'Opening the ghats…';
-    runQuickStart();
-  }
-
-  function runQuickStart() {
-    const N = CONFIG.quickStart;
-    let done = 0;
-
-    for (let i = 0; i < N; i++) {
-      const idx = i;
-      loadWithFallback(idx, i + 1, () => {
-        done++;
-        const pct = (done / N) * 100;
-        progressFill.style.width = pct + '%';
-        progressLabel.textContent = `Opening scene ${done} of ${N}`;
-        if (idx === 0 && frames[0]) paintImage(frames[0]);
-        if (done === N) onQuickStartDone();
-      });
-    }
-  }
-
-  function onQuickStartDone() {
-    loaderPhase.textContent = 'Step inside…';
-    progressFill.style.width = '100%';
-
-    setTimeout(() => {
-      loader.classList.add('hidden');
-      siteRevealed = true;
-      setTimeout(() => {
-        loader.style.display = 'none';
-        initScroll();
-        paintImage(frames[0]);
-        // Phase 2: load all remaining in background
-        startBackgroundLoad(CONFIG.quickStart);
-      }, 900);
-    }, 400);
-  }
-
-  /* ════════════════════════════════════════════════════════
-     PHASE 2 — Background parallel workers
-  ════════════════════════════════════════════════════════ */
-  function startBackgroundLoad(fromIdx) {
-    let next = fromIdx;
-    const total = CONFIG.totalFrames;
-
-    function worker() {
-      if (next >= total) return;
-      const i = next++;
-      if (frames[i]) { worker(); return; }  // skip already-loaded
-
-      loadWithFallback(i, i + 1, () => {
-        // Update buffer bar
-        const pct = (totalLoaded / total) * 100;
-        bufferBar.style.width = pct + '%';
-        if (totalLoaded >= total) {
-          setTimeout(() => bufferBar.classList.add('complete'), 600);
-        }
-        worker();
-      });
-    }
-
-    // Spawn N_WORKERS parallel workers
-    const toSpawn = Math.min(CONFIG.nWorkers, CONFIG.totalFrames - fromIdx);
-    for (let w = 0; w < toSpawn; w++) {
-      worker();
-    }
-  }
-
-  /* ════════════════════════════════════════════════════════
-     LOOKAHEAD — priority-load frames near current position
-  ════════════════════════════════════════════════════════ */
-  let lookaheadTimer = null;
-  function triggerLookahead(idx) {
-    clearTimeout(lookaheadTimer);
-    lookaheadTimer = setTimeout(() => {
-      const end = Math.min(idx + CONFIG.lookahead, CONFIG.totalFrames);
-      for (let i = idx; i < end; i++) {
-        if (!frames[i]) {
-          ((captured) => {
-            loadWithFallback(captured, captured + 1, () => {});
-          })(i);
-        }
-      }
-    }, 80);
-  }
-
-  /* ════════════════════════════════════════════════════════
-     GSAP SCROLL ENGINE
-  ════════════════════════════════════════════════════════ */
-  function initScroll() {
-    gsap.registerPlugin(ScrollTrigger);
-
-    const totalScrollH = CONFIG.totalFrames * CONFIG.scrollPerFrame;
-    canvasContainer.style.height = totalScrollH + 'px';
-
-    // Main frame scrub
-    ScrollTrigger.create({
-      trigger:  canvasContainer,
-      start:    'top top',
-      end:      'bottom bottom',
-      scrub:    CONFIG.scrubLag,
-      onUpdate: self => {
-        const idx = Math.round(self.progress * (CONFIG.totalFrames - 1));
-        currentFrameIdx = Math.max(0, Math.min(CONFIG.totalFrames - 1, idx));
-        requestDraw();
-
-        // Scroll progress bar
-        scrollProgFill.style.height = (self.progress * 100) + '%';
-
-        // Hero fade
-        if (self.progress > 0.003) heroOverlay.classList.add('hidden');
-        else heroOverlay.classList.remove('hidden');
-
-        // Lookahead
-        triggerLookahead(currentFrameIdx);
-      }
-    });
-
-    /* ── Section ghat overlays ── */
-    CONFIG.sections.forEach(section => {
-      const el = document.getElementById(section.id);
-      if (!el) return;
-
-      const startPx = section.startFraction * totalScrollH;
-      const endPx   = section.endFraction   * totalScrollH;
-      const fadePx  = Math.min((endPx - startPx) * 0.1, 100);
-
-      // Fade IN
-      ScrollTrigger.create({
-        trigger:     canvasContainer,
-        start:       `top+=${startPx}px top`,
-        end:         `top+=${startPx + fadePx}px top`,
-        scrub:       0.3,
-        onUpdate:    s => {
-          gsap.set(el, { opacity: s.progress, y: 16 * (1 - s.progress), immediateRender: false });
-        },
-        onLeave:     () => gsap.set(el, { opacity: 1, y: 0 }),
-        onEnterBack: () => gsap.set(el, { opacity: 1, y: 0 }),
-      });
-
-      // Fade OUT
-      const fadeOutStart = endPx - fadePx;
-      ScrollTrigger.create({
-        trigger:     canvasContainer,
-        start:       `top+=${fadeOutStart}px top`,
-        end:         `top+=${endPx}px top`,
-        scrub:       0.3,
-        onUpdate:    s => {
-          gsap.set(el, { opacity: 1 - s.progress, y: 12 * s.progress, immediateRender: false });
-        },
-        onLeaveBack: () => gsap.set(el, { opacity: 1, y: 0 }),
-      });
-    });
-  }
-
-  /* ════════════════════════════════════════════════════════
-     RESIZE
-  ════════════════════════════════════════════════════════ */
-  window.addEventListener('resize', () => {
-    resizeCanvas();
-    const img = getBestFrame(currentFrameIdx);
-    if (img) paintImage(img);
-    if (siteRevealed) ScrollTrigger.refresh();
-  });
-
-  /* ════════════════════════════════════════════════════════
-     BOOT
-  ════════════════════════════════════════════════════════ */
-  probeThenQuickStart();
-  </script>
 </body>
 </html>
