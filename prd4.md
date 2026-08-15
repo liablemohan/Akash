@@ -1,8 +1,5 @@
 # PRD: Post-Hero Interactive Transition & Immersive 3D Model Experience
 
-## 1. Objective
-
-Create a seamless transition from the hero video into an interactive 3D experience centered around the **VT Temple corridor model**.
 
 The experience should reinforce the narrative of:
 
@@ -15,19 +12,7 @@ The transition should feel **cinematic, sacred, calm, and immersive**, rather th
 # 2. User Flow
 
 ```text
-Hero Section
-     │
-     ▼
-Hero Video Auto-plays
-     │
-     ▼
-First Full Video Playback Completes
-     │
-     ▼
-Video Exit Transition
-     │
-     ▼
-VT Temple 3D Model Emerges
+hero state
      │
      ▼
 Temple Rotation + Scale Animation
@@ -60,31 +45,11 @@ User Can Interact
 
 ---
 
-# 3. Phase 1 — Hero Video Exit Transition
-
-### Trigger
-
-The first complete playback of the hero video finishes.
-
-### Behavior
-
-The video:
-
-* Fades out smoothly.
-* Uses an **ease-in-out opacity transition**.
-* Duration: **800–1200 ms**.
-
-### Result
-
-The video disappears and the canvas becomes available for the 3D experience.
-
----
-
-# 4. Phase 2 — VT Temple Corridor Emergence
+# 3. Phase 1 — VT Temple becomes dominant
 
 ## Initial State
 
-The VT Temple corridor model should initially be:
+The VT Temple model should initially be:
 
 * Centered or approximately **5–10% left of center**.
 * Scaled to approximately **60–70%** of its final size.
@@ -125,7 +90,7 @@ The model:
 
 ---
 
-# 5. Phase 3 — Golden Aura
+# 4. Phase 2 — Golden Aura
 
 ### Trigger
 
@@ -161,7 +126,7 @@ The aura should:
 
 ---
 
-# 6. Phase 4 — Symbolic Elements
+# 5. Phase 3 — Symbolic Elements
 
 The following five objects emerge from the temple:
 
@@ -188,7 +153,7 @@ The movement should resemble **gentle energy dispersal** rather than explosive p
 
 ---
 
-# 7. Phase 5 — Orbital Motion
+# 6. Phase 4 — Orbital Motion
 
 Once the symbolic elements have emerged, they begin orbiting the temple.
 
@@ -220,7 +185,7 @@ The movement should remain:
 
 ---
 
-# 8. Phase 6 — Hover Interaction
+# 7. Phase 5 — Hover Interaction
 
 Each orbital object is interactive.
 
@@ -249,7 +214,7 @@ Optional but recommended:
 
 ---
 
-# 9. Phase 7 — Expanded Object Interaction
+# 8. Phase 6 — Expanded Object Interaction
 
 ## Trigger
 
@@ -265,7 +230,7 @@ The selected element becomes the focal point.
 
 ---
 
-# 10. Element Expansion
+# 9. Element Expansion
 
 The selected object:
 
@@ -280,7 +245,7 @@ Easing:   ease-in-out
 
 ---
 
-# 11. Scene Recomposition
+# 10. Scene Recomposition
 
 When an element is selected:
 
@@ -306,7 +271,7 @@ The selected object becomes the dominant visual element.
 
 ---
 
-# 12. Content Panel
+# 11. Content Panel
 
 A content panel appears on the **left side** of the screen.
 
@@ -330,7 +295,7 @@ The overall composition becomes:
 
 ---
 
-# 13. Content Panel Structure
+# 12. Content Panel Structure
 
 ## Header
 
@@ -384,7 +349,7 @@ The panel itself should be implemented as an **HTML overlay**, rather than insid
 
 ---
 
-# 15. Exit / Reset Behavior
+# 13. Exit / Reset Behavior
 
 The user can exit the focused state by:
 
@@ -421,7 +386,7 @@ Focused State
 
 ---
 
-# 16. Visual Design
+# 14. Visual Design
 
 ## Color Language
 
@@ -454,7 +419,7 @@ Soft cream:
 
 ---
 
-# 17. Lighting
+# 14. Lighting
 
 Use:
 
@@ -473,7 +438,7 @@ Avoid:
 
 ---
 
-# 18. Spatial Hierarchy
+# 15. Spatial Hierarchy
 
 The interface should maintain a clear division:
 
@@ -492,7 +457,7 @@ When an object is selected:
 
 ---
 
-# 19. Technical Architecture
+# 16. Technical Architecture
 
 ## Recommended Stack
 
@@ -525,7 +490,7 @@ The content panel should **not** be rendered inside WebGL.
 
 ---
 
-# 20. Performance Requirements
+# 17. Performance Requirements
 
 Target:
 
@@ -542,7 +507,7 @@ Target:
 
 ---
 
-# 21. Responsive Behavior
+# 18. Responsive Behavior
 
 ## Desktop
 
@@ -585,7 +550,7 @@ Optional:
 
 ---
 
-# 22. Fallback Experience
+# 19. Fallback Experience
 
 For low-end devices:
 
@@ -608,51 +573,41 @@ Possible fallback:
 
 ---
 
-# 23. Complete State Model
+# 20. Complete State Model
 
 The experience can be implemented as the following states:
 
 ```text
 STATE 1
-HERO_VIDEO
-    │
-    │ video complete
-    ▼
-STATE 2
-VIDEO_EXIT
-    │
-    │ fade complete
-    ▼
-STATE 3
 TEMPLE_EMERGENCE
     │
     │ scale + rotation complete
     ▼
-STATE 4
+STATE 2
 TEMPLE_AURA
     │
     │ aura complete
     ▼
-STATE 5
+STATE 3
 SYMBOL_EMERGENCE
     │
     │ spawn complete
     ▼
-STATE 6
+STATE 4
 ORBITAL_INTERACTION
     │
     ├── hover → HIGHLIGHT
     │
     └── click
           ▼
-STATE 7
+STATE 5
 FOCUSED_OBJECT
     │
     ├── content interaction
     │
     └── back/outside click
              ▼
-STATE 8
+STATE 6
 RESET
     │
     ▼
@@ -665,8 +620,6 @@ ORBITAL_INTERACTION
 
 | Interaction         |          Duration |
 | ------------------- | ----------------: |
-| Video fade-out      |       800–1200 ms |
-| Temple scale        |      1200–1500 ms |
 | Temple rotation     |      1500–2000 ms |
 | Golden aura fade-in |           ~500 ms |
 | Symbol emergence    |       800–1200 ms |
@@ -680,20 +633,18 @@ ORBITAL_INTERACTION
 # 25. Primary Success Criteria
 
 The implementation is successful when:
-
-1. The hero video transitions into the 3D scene without an abrupt visual break.
-2. The temple is clearly established as the primary visual focal point.
-3. Symbolic objects emerge naturally from the temple.
-4. Orbital movement is slow and meditative.
-5. Interactive objects are visually discoverable.
-6. Hover/touch states clearly communicate interactivity.
-7. Clicking an object creates a clear transition from **exploration → focused content**.
-8. The selected object becomes visually dominant.
-9. The content panel provides clear information architecture.
-10. Returning to the default state feels seamless.
-11. No significant layout shifts occur.
-12. The experience maintains approximately **50–60 FPS on mid-tier devices**.
-13. A functional fallback exists for low-end devices.
+1. The temple is clearly established as the primary visual focal point.
+2. Symbolic objects emerge naturally from the temple.
+3. Orbital movement is slow and meditative.
+4. Interactive objects are visually discoverable.
+5. Hover/touch states clearly communicate interactivity.
+6. Clicking an object creates a clear transition from **exploration → focused content**.
+7. The selected object becomes visually dominant.
+8. The content panel provides clear information architecture.
+9. Returning to the default state feels seamless.
+10. No significant layout shifts occur.
+11. The experience maintains approximately **50–60 FPS on mid-tier devices**.
+12. A functional fallback exists for low-end devices.
 
 ---
 
@@ -713,9 +664,6 @@ The architecture should leave room for:
 ### Conceptual final experience
 
 ```text
-              HERO VIDEO
-                   │
-                   ▼
           ┌─────────────────┐
           │  TEMPLE EMERGES │
           └────────┬────────┘

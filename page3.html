@@ -412,16 +412,16 @@
      CONFIGURATION
   ════════════════════════════════════════════════════════ */
   const CONFIG = {
-    totalFrames:   8511,          // all source frames, 1:1 from frames_webp
+    totalFrames:   2128,          // all source frames, 1:1 from frames_webp
 
     // Primary format: webp (frames_webp/), fallback: png (frames/)
     frameExt:    'webp',
-    frameDir:    'frames_webp',
+    frameDir:    'frames_webp_opt',
 
     framePath: (n, ext, dir) =>
       `${dir}/out_${String(n).padStart(4,'0')}.${ext}`,
 
-    scrollPerFrame: 8,            // halved so total scroll height stays the same
+    scrollPerFrame: 24,           // optimized: 2128 frames (every 4th of original 8511)
     scrubLag:       0.5,
 
     // Progressive loading tuning
@@ -543,7 +543,7 @@
       onDone(index);
     };
     img.onerror = () => { frames[index] = null; onDone(index); };
-    img.src = CONFIG.framePath(frameNumber, 'webp', 'frames_webp');
+    img.src = CONFIG.framePath(frameNumber, 'webp', 'frames_webp_opt');
   }
 
   /* ════════════════════════════════════════════════════════
