@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>काशी — The Eternal City · A Journey Along the Ghats</title>
-  <meta name="description" content="A cinematic scroll journey through the sacred ghats of Varanasi — Dashashwamedh, Manikarnika, Assi, Harishchandra, and Scindia — where the Ganga meets eternity." />
+  <title>मणिकर्णिका — Manikarnika Ghat | Kashi, The Eternal City</title>
+  <meta name="description" content="A short cinematic scroll through Manikarnika Ghat, Varanasi's great cremation ground — with facts and sourced notes on Kashi appearing as you scroll." />
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -26,7 +26,10 @@
       --ink-solid:  #0A0602;
     }
 
-    html { scroll-behavior: auto; }
+    html {
+      scroll-behavior: auto;
+      background: var(--ink-solid);
+    }
 
     body {
       background: var(--ink-solid);
@@ -135,6 +138,9 @@
     }
 
     /* ─── Canvas ─── */
+    /* Explicit dark background on the canvas itself so any un-painted
+       gap (a resize, a not-yet-loaded frame) shows ink-black instead of
+       the browser's default white canvas backdrop. */
     #main-canvas {
       position: fixed;
       top: 0; left: 0;
@@ -142,6 +148,7 @@
       display: block;
       will-change: transform;
       z-index: 1;
+      background: var(--ink-solid);
     }
 
     /* ─── Canvas Container (scroll driver) ─── */
@@ -259,6 +266,16 @@
       color: rgba(245, 236, 215, 0.75);
       font-style: italic;
     }
+    .ghat-source {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(200, 151, 58, 0.22);
+      font-family: 'EB Garamond', serif;
+      font-size: 12px;
+      letter-spacing: 0.02em;
+      color: rgba(200, 151, 58, 0.75);
+    }
+    .ghat-source em { font-style: italic; }
 
     /* ─── Cinematic Vignette ─── */
     #vignette {
@@ -267,6 +284,50 @@
       background: radial-gradient(ellipse at center,
         transparent 50%,
         rgba(2, 1, 0, 0.55) 100%);
+    }
+
+    /* ─── Page Navigation (top right) ─── */
+    #page-nav {
+      position: fixed;
+      top: 32px; right: 48px;
+      z-index: 50;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 10px;
+      max-width: 62vw;
+
+      background: rgba(10, 6, 2, 0.55);
+      backdrop-filter: blur(14px) saturate(1.4);
+      -webkit-backdrop-filter: blur(14px) saturate(1.4);
+      border: 1px solid rgba(200, 151, 58, 0.25);
+      border-radius: 100px;
+      padding: 8px 18px;
+
+      font-family: 'EB Garamond', serif;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+    .page-nav-link {
+      color: rgba(245, 236, 215, 0.6);
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+    .page-nav-link:hover,
+    .page-nav-link:focus-visible { color: var(--gold); }
+    .page-nav-link.active { color: var(--gold); cursor: default; }
+    .page-nav-sep { color: rgba(200, 151, 58, 0.5); font-size: 10px; }
+    .nav-logo {
+      height: 24px;
+      width: auto;
+      display: block;
+      margin-right: 4px;
+      filter: drop-shadow(0 0 8px rgba(200, 151, 58, 0.3));
+    }
+    @media (max-width: 700px) {
+      #page-nav { top: 20px; right: 16px; gap: 8px; font-size: 10px; padding: 6px 14px; }
     }
 
     /* ─── Buffering notice (brief flash when scroll outruns load) ─── */
@@ -286,46 +347,175 @@
     }
     #buffer-notice.visible { opacity: 1; }
 
-    /* ─── End Credit ─── */
-    #end-credit {
+    /* (End-credit section removed — down-scroll now keeps only the three
+       nav cards and the footer, per spec.) */
+
+    /* ─── Continue-exploring cards (appear once the frame sequence ends) ─── */
+    #nav-cards {
       position: relative; z-index: 30;
       background: var(--ink-solid);
       min-height: 100vh;
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
-      gap: 28px; padding: 80px 40px; text-align: center;
+      gap: 48px; padding: 80px 40px; text-align: center;
     }
-    .end-credit-kashi {
-      font-family: 'Noto Serif Devanagari', serif;
-      font-size: clamp(36px, 6vw, 72px);
-      font-weight: 300;
-      color: var(--parchment);
-      letter-spacing: 0.08em;
-    }
-    .end-credit-rule { width: 40px; height: 1px; background: var(--gold); opacity: 0.45; }
-    .end-credit-quote {
-      font-family: 'EB Garamond', serif;
-      font-size: clamp(15px, 1.8vw, 21px);
-      font-style: italic;
-      color: rgba(245, 236, 215, 0.55);
-      max-width: 480px; line-height: 1.75;
-    }
-    .end-credit-attribution {
+    .nav-cards-heading {
       font-family: 'EB Garamond', serif;
       font-size: 11px;
-      letter-spacing: 0.26em;
+      letter-spacing: 0.32em;
       text-transform: uppercase;
+      color: rgba(245, 236, 215, 0.45);
+    }
+    .nav-cards-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 24px;
+    }
+    .nav-card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+      width: 250px;
+      padding: 36px 28px;
+      text-decoration: none;
+      background: linear-gradient(160deg, rgba(200, 151, 58, 0.07), rgba(200, 151, 58, 0.015));
+      border: 1px solid rgba(200, 151, 58, 0.20);
+      border-radius: 18px;
+      overflow: hidden;
+      transition: background 0.28s ease, border-color 0.28s ease, transform 0.28s ease, box-shadow 0.28s ease;
+    }
+    .nav-card::after {
+      content: '→';
+      position: absolute;
+      top: 28px; right: 24px;
+      font-size: 16px;
+      color: rgba(200, 151, 58, 0.4);
+      transition: transform 0.28s ease, color 0.28s ease;
+    }
+    .nav-card:hover,
+    .nav-card:focus-visible {
+      background: linear-gradient(160deg, rgba(200, 151, 58, 0.14), rgba(200, 151, 58, 0.03));
+      border-color: rgba(200, 151, 58, 0.55);
+      transform: translateY(-5px);
+      box-shadow: 0 16px 34px rgba(0,0,0,0.35);
+      outline: none;
+    }
+    .nav-card:hover::after,
+    .nav-card:focus-visible::after {
+      transform: translateX(4px);
       color: var(--gold);
-      opacity: 0.45;
+    }
+    .nav-card-icon {
+      font-size: 26px;
+      opacity: 0.9;
+    }
+    .nav-card-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 24px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      color: var(--parchment);
+    }
+    .nav-card-desc {
+      font-family: 'EB Garamond', serif;
+      font-size: 13px;
+      line-height: 1.55;
+      color: rgba(245, 236, 215, 0.5);
+    }
+    .nav-card:hover .nav-card-title,
+    .nav-card:focus-visible .nav-card-title {
+      color: var(--gold);
+    }
+
+    /* ─── Site footer ─── */
+    #site-footer {
+      position: relative;
+      z-index: 30;
+      min-height: 33vh;
+      width: 100%;
+      box-sizing: border-box;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 32px;
+      padding: 48px 6vw;
+      background: var(--ink-solid);
+      border-top: 1px solid rgba(200, 151, 58, 0.18);
+    }
+    .footer-col--left { display: flex; flex-direction: column; gap: 8px; }
+    .footer-copy {
+      font-family: 'EB Garamond', serif;
+      font-size: 13px;
+      color: rgba(245, 236, 215, 0.5);
+    }
+    .footer-credit {
+      font-family: 'EB Garamond', serif;
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(200, 151, 58, 0.65);
+    }
+    .footer-col--right {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .footer-nav { display: flex; gap: 18px; flex-wrap: wrap; }
+    .footer-nav a {
+      font-family: 'EB Garamond', serif;
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(245, 236, 215, 0.55);
+      text-decoration: none;
+      transition: color 0.25s ease;
+    }
+    .footer-nav a:hover,
+    .footer-nav a:focus-visible { color: var(--gold); }
+    .footer-logo { height: 78px; width: auto; display: block; }
+
+    @media (max-width: 700px) {
+      #site-footer {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 40px 6vw;
+        gap: 24px;
+        min-height: auto;
+      }
+      .footer-col--right { justify-content: flex-start; }
     }
 
     /* ─── Responsive ─── */
     @media (max-width: 600px) {
       .ghat-overlay { left: 16px; right: 16px; width: auto; bottom: 40px; padding: 22px; }
+      .nav-card { width: 78vw; padding: 30px 24px; }
+      #nav-cards { gap: 32px; padding: 60px 24px; }
     }
   </style>
 </head>
 <body>
+
+  <!-- ── Page navigation (top right) ─────────────────────────────────── -->
+  <nav id="page-nav" aria-label="Page navigation">
+    <img class="nav-logo" src="loading_images/5_cropped.png" alt="Banarasi Bhaukal">
+    <a href="index.html" class="page-nav-link">Home</a>
+    <span class="page-nav-sep">|</span>
+    <a href="explore-kashi.html" class="page-nav-link">Explore Kashi</a>
+    <span class="page-nav-sep">|</span>
+    <span class="page-nav-link active" aria-current="page">Manikarnika</span>
+    <span class="page-nav-sep">|</span>
+    <a href="patra.html" class="page-nav-link">Patra</a>
+    <span class="page-nav-sep">|</span>
+    <a href="about.html" class="page-nav-link">About</a>
+    <span class="page-nav-sep">|</span>
+    <a href="bio.html" class="page-nav-link">Bio</a>
+  </nav>
 
   <!-- ══════════ LOADER ══════════ -->
   <div id="loader">
@@ -358,8 +548,8 @@
 
   <!-- ══════════ HERO OVERLAY ══════════ -->
   <div id="hero-overlay">
-    <div class="hero-kashi">काशी</div>
-    <div class="hero-subtitle">The Eternal City · A Journey Along the Ghats</div>
+    <div class="hero-kashi">मणिकर्णिका</div>
+    <div class="hero-subtitle">Manikarnika Ghat · Fire, Ash and Eternity</div>
     <div class="hero-rule"></div>
     <div class="scroll-prompt">
       <div class="scroll-prompt-text">Scroll to journey</div>
@@ -370,52 +560,70 @@
   <!-- ══════════ CANVAS CONTAINER (scroll driver) ══════════ -->
   <div id="canvas-container"><!-- height set by JS --></div>
 
-  <!-- ══════════ GHAT OVERLAYS ══════════ -->
+  <!-- ══════════ FACT BOXES (bottom-left grey box, appear while scrolling) ══════════ -->
   <div class="ghat-overlay" id="ghat-0">
-    <div class="ghat-sanskrit">दशाश्वमेध घाट</div>
-    <div class="ghat-name">Dashashwamedh<br>Ghat</div>
+    <div class="ghat-sanskrit">तीन ग्राम ज्ञान</div>
+    <div class="ghat-name">Three Grams<br>of Knowledge</div>
     <div class="ghat-rule"></div>
-    <div class="ghat-desc">Where Brahma himself performed the Dasha-ashwamedha yajna — the ten-horse sacrifice — to welcome Lord Shiva back to Kashi. Each evening, the Ganga Aarti transforms this stone into a stage for fire and devotion.</div>
+    <div class="ghat-desc">Hindu tradition holds that Kashi, Shiva speaks the taraka mantra into the ear of the dying — said to grant moksha regardless of a person's past deeds, which is why Manikarnika has drawn the dying and their families for millennia.</div>
+    <div class="ghat-source">Source: Eck, D. L., <em>Banaras, City of Light</em>, Columbia University Press, 1982.</div>
   </div>
 
   <div class="ghat-overlay" id="ghat-1">
-    <div class="ghat-sanskrit">मणिकर्णिका घाट</div>
-    <div class="ghat-name">Manikarnika<br>Ghat</div>
+    <div class="ghat-sanskrit">अखण्ड अग्नि</div>
+    <div class="ghat-name">The Fire That<br>Never Goes Out</div>
     <div class="ghat-rule"></div>
-    <div class="ghat-desc">The great cremation ghat, where pyres have burned without pause for three thousand years. To die at Manikarnika is to receive moksha from Shiva's own lips — liberation from the endless cycle of birth and death.</div>
+    <div class="ghat-desc">The cremation fires at Manikarnika are traditionally described as unbroken for thousands of years, tended by the Dom Raja community, whose hereditary right to supply the sacred flame is recorded in colonial-era gazetteers.</div>
+    <div class="ghat-source">Source: Parry, J., <em>Death in Banaras</em>, Cambridge University Press, 1994.</div>
   </div>
 
   <div class="ghat-overlay" id="ghat-2">
-    <div class="ghat-sanskrit">अस्सी घाट</div>
-    <div class="ghat-name">Assi<br>Ghat</div>
+    <div class="ghat-sanskrit">मणिकर्णिका कुण्ड</div>
+    <div class="ghat-name">The Well of<br>the Jewelled Ear</div>
     <div class="ghat-rule"></div>
-    <div class="ghat-desc">Where the river Assi surrenders herself into the Ganga at the southern boundary of sacred Kashi. The mornings here belong to the bathers and the birds; the evenings to pilgrims circling a Shivalinga beneath a peepal tree.</div>
+    <div class="ghat-desc">Beside the ghat sits Manikarnika Kund, a stepped tank older than the Ganga's course beside it — legend holds Vishnu dug it with his discus, and Shiva's earring fell in as he watched, giving the ghat its name.</div>
+    <div class="ghat-source">Source: Singh, R. P. B., <em>Banaras, Making of India's Heritage City</em>, Cambridge Scholars, 2009.</div>
   </div>
 
-  <div class="ghat-overlay" id="ghat-3">
-    <div class="ghat-sanskrit">हरिश्चन्द्र घाट</div>
-    <div class="ghat-name">Harishchandra<br>Ghat</div>
-    <div class="ghat-rule"></div>
-    <div class="ghat-desc">Named for the legendary king who kept his word at every cost — who worked as a keeper of the dead rather than speak a single untruth. It is the older of Kashi's two burning ghats, and the more solitary.</div>
-  </div>
-
-  <div class="ghat-overlay" id="ghat-4">
-    <div class="ghat-sanskrit">सिन्धिया घाट</div>
-    <div class="ghat-name">Scindia<br>Ghat</div>
-    <div class="ghat-rule"></div>
-    <div class="ghat-desc">The tilting Shiva temple, half-submerged in the Ganga, stands as proof that even stone must bow to the river. Built by the Scindia dynasty and swallowed by the flood — still visited, still consecrated, still alive.</div>
-  </div>
-
-  <!-- ══════════ END CREDIT ══════════ -->
-  <div id="end-credit">
-    <div class="end-credit-kashi">काशी</div>
-    <div class="end-credit-rule"></div>
-    <div class="end-credit-quote">
-      "Kashi is not a city. It is a crossing — a tirtha — where the visible and the invisible share the same street."
+  <!-- ══════════ CONTINUE EXPLORING (appears once the scroll journey ends) ══════════ -->
+  <div id="nav-cards">
+    <div class="nav-cards-heading">Continue exploring</div>
+    <div class="nav-cards-grid">
+      <a class="nav-card" href="index.html">
+        <span class="nav-card-icon">🏠</span>
+        <span class="nav-card-title">Home</span>
+        <span class="nav-card-desc">Back to the ghats — the scroll journey where this all begins.</span>
+      </a>
+      <a class="nav-card" href="explore-kashi.html">
+        <span class="nav-card-icon">🛕</span>
+        <span class="nav-card-title">Explore Kashi</span>
+        <span class="nav-card-desc">Step into the interactive 3D temple and its sacred objects.</span>
+      </a>
+      <a class="nav-card" href="patra.html">
+        <span class="nav-card-icon">📜</span>
+        <span class="nav-card-title">Patra</span>
+        <span class="nav-card-desc">The artefacts of Kashi, rendered in gold line and story.</span>
+      </a>
     </div>
-    <div class="end-credit-attribution">The Eternal City · Varanasi · Since Time Immemorial</div>
   </div>
 
+  <!-- ══════════ FOOTER ══════════ -->
+  <footer id="site-footer">
+    <div class="footer-col--left">
+      <p class="footer-copy">© 2026 Kashi — The Eternal City. All rights reserved.</p>
+      <p class="footer-credit">by Twashta Labs</p>
+    </div>
+    <div class="footer-col--right">
+      <nav class="footer-nav" aria-label="Footer navigation">
+        <a href="index.html">Home</a>
+        <a href="explore-kashi.html">Explore Kashi</a>
+        <a href="patra.html">Patra</a>
+        <a href="about.html">About</a>
+        <a href="bio.html">Bio</a>
+      </nav>
+      <img class="footer-logo" src="loading_images/5_cropped.png" alt="Banarasi Bhaukal logo">
+    </div>
+  </footer>
 
   <script>
   /* ════════════════════════════════════════════════════════
@@ -439,12 +647,13 @@
     nWorkers:      8,             // parallel background loaders
     lookahead:     200,           // frames to pre-load ahead of scroll position
 
+    // Three Kashi fact boxes (with sourced citations) spaced across the
+    // short, Manikarnika-focused scroll, replacing the old five ghat-name
+    // overlays.
     sections: [
-      { id: 'ghat-0', startFraction: 0,   endFraction: 0.2 },
-      { id: 'ghat-1', startFraction: 0.2, endFraction: 0.4 },
-      { id: 'ghat-2', startFraction: 0.4, endFraction: 0.6 },
-      { id: 'ghat-3', startFraction: 0.6, endFraction: 0.8 },
-      { id: 'ghat-4', startFraction: 0.8, endFraction: 1.0 },
+      { id: 'ghat-0', startFraction: 0,     endFraction: 0.34 },
+      { id: 'ghat-1', startFraction: 0.34,  endFraction: 0.67 },
+      { id: 'ghat-2', startFraction: 0.67,  endFraction: 1.0  },
     ]
   };
 
@@ -642,7 +851,11 @@
   function initScroll() {
     gsap.registerPlugin(ScrollTrigger);
 
-    const totalScrollH = CONFIG.totalFrames * CONFIG.scrollPerFrame;
+    // Compressed to ~3 screens of scrolling (per spec: "the hero section
+    // till 3 scrolls of Manikarnika ghat") — the full frame sequence still
+    // plays, just scrubbed across a much shorter, more focused journey
+    // instead of the original ~26-screen scroll.
+    const totalScrollH = window.innerHeight * 3;
     canvasContainer.style.height = totalScrollH + 'px';
 
     // Main frame scrub

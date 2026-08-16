@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Kashi – Eternal City: An immersive 3D heritage journey through Varanasi's Vishwanath Temple Corridor. Where Heritage Meets Living Data.">
+  <title>Kashi — Eternal City</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Three.js ES Module importmap -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three":          "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js",
+      "three/addons/":  "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+
+  <!-- ── Page navigation (top right) ─────────────────────────────────── -->
+  <nav id="page-nav" aria-label="Page navigation">
+    <img class="nav-logo" src="loading_images/5_cropped.png" alt="Banarasi Bhaukal">
+    <a href="index.html" class="page-nav-link">Home</a>
+    <span class="page-nav-sep">|</span>
+    <span class="page-nav-link active" aria-current="page">Explore Kashi</span>
+    <span class="page-nav-sep">|</span>
+    <a href="page2.html" class="page-nav-link">Manikarnika</a>
+    <span class="page-nav-sep">|</span>
+    <a href="patra.html" class="page-nav-link">Patra</a>
+    <span class="page-nav-sep">|</span>
+    <a href="about.html" class="page-nav-link">About</a>
+    <span class="page-nav-sep">|</span>
+    <a href="bio.html" class="page-nav-link">Bio</a>
+  </nav>
+
+  <!-- ── Preloader: sequential logo reveal + golden loading bar ─────────── -->
+  <div id="loader">
+    <div class="loader-stage" aria-hidden="true">
+      <img class="loader-img" src="loading_images/1_cropped.png" alt="" loading="eager" fetchpriority="high">
+      <img class="loader-img" src="loading_images/2_cropped.png" alt="" loading="eager" fetchpriority="high">
+      <img class="loader-img" src="loading_images/3_cropped.png" alt="" loading="eager" fetchpriority="high">
+      <img class="loader-img" src="loading_images/4_cropped.png" alt="" loading="eager" fetchpriority="high">
+      <img class="loader-img" src="loading_images/5_cropped.png" alt="" loading="eager" fetchpriority="high">
+    </div>
+    <div class="loader-bar-track">
+      <div class="loader-bar-fill"></div>
+    </div>
+  </div>
+
+  <!-- ── SVG filter defs: chromatic aberration ────────────── -->
+  <svg class="defs" width="0" height="0" aria-hidden="true">
+    <defs>
+      <filter id="chromaticAberration" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
+        <feColorMatrix in="SourceGraphic" type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="r"/>
+        <feOffset in="r" dx="-0.8" dy="0" result="rOffset"/>
+        <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" result="g"/>
+        <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="b"/>
+        <feOffset in="b" dx="0.8" dy="0" result="bOffset"/>
+        <feComposite in="rOffset" in2="g" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" result="rg"/>
+        <feComposite in="rg" in2="bOffset" operator="arithmetic" k1="0" k2="1" k3="1" k4="0"/>
+      </filter>
+    </defs>
+  </svg>
+
+  <main id="app">
+
+    <!-- ── Section 1: Hero Video ──────────────────────────────────────── -->
+    <section class="hero" id="hero" aria-label="Hero: Kashi the Eternal City">
+      <div class="hero-stage" id="heroStage">
+        <!--
+          loop attribute intentionally removed.
+          JS intercepts the first 'ended' event to trigger the 3D transition,
+          then re-loops the video during 3D scene display.
+        -->
+        <video
+          class="hero-video"
+          id="heroVideo"
+          src="assets/large_hero_clean.mp4"
+          autoplay
+          muted
+          playsinline
+          preload="auto"
+        ></video>
+        <div class="vignette"></div>
+      </div>
+
+      <div class="hero-copy">
+        <span class="eyebrow">Est. before time itself</span>
+        <h1 class="title">
+          <span class="line">Kashi</span>
+          <span class="line accent">the eternal city</span>
+        </h1>
+        <p class="subtitle">Where the Ganga carries fire, smoke, and twelve centuries of prayer past a skyline that has never stopped rising.</p>
+      </div>
+
+      <div class="scroll-cue" aria-hidden="true">
+        <span>Scroll</span>
+        <div class="scroll-line"><i></i></div>
+      </div>
+
+      <!-- Skip-to-3D button: appears after 5s if video hasn't ended -->
+      <button
+        id="skip-to-3d"
+        aria-label="Skip to the interactive 3D heritage experience"
+      >Enter 3D Experience ↗</button>
+    </section>
+
+    <!-- ── Section 2: Interactive 3D Scene ───────────────────────────── -->
+    <section
+      id="scene-section"
+      aria-label="Interactive 3D Heritage Scene — Vishwanath Temple Corridor"
+    >
+      <!-- Three.js renders into this canvas -->
+      <canvas id="three-canvas"></canvas>
+
+      <!-- Loading / interaction hint text -->
+      <p id="scene-hint" aria-live="polite"></p>
+
+      <!-- Carousel navigation arrows — faded in after artifacts spawn -->
+      <button
+        id="carousel-prev"
+        class="carousel-arrow carousel-arrow--prev"
+        aria-label="Previous sacred object"
+        style="opacity:0"
+      >&#8592;</button>
+
+      <button
+        id="carousel-next"
+        class="carousel-arrow carousel-arrow--next"
+        aria-label="Next sacred object"
+        style="opacity:0"
+      >&#8594;</button>
+
+      <!-- ── Focused state: left content panel (PRD §12–13) ───────────── -->
+      <aside
+        id="content-panel"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="panel-title"
+      >
+        <!-- Close / back -->
+        <button id="panel-close" aria-label="Return to orbital view">
+          <span aria-hidden="true">←</span> Back
+        </button>
+
+        <!-- Object identity -->
+        <header class="panel-header">
+          <div class="panel-icon" id="panel-icon" aria-hidden="true"></div>
+          <div class="panel-meta">
+            <p class="panel-category" id="panel-category">Sacred Object</p>
+            <h2 class="panel-title" id="panel-title"></h2>
+          </div>
+        </header>
+
+        <!-- Story / description -->
+        <p class="panel-story" id="panel-story"></p>
+
+        <!-- Article cards (PRD §13 — Article List) -->
+        <div class="panel-articles" id="panel-articles" aria-label="Related content">
+          <!-- Injected by JS per artifact -->
+        </div>
+      </aside>
+
+      <!-- ── Focused state: right object label (PRD §10) ───────────────── -->
+      <div id="object-panel" aria-hidden="true">
+        <p class="object-label" id="object-label"></p>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ── GSAP (global, for main.js + scene.js) ─────────────────────────── -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+  <!-- ── Hero animations (preloader, scroll parallax, mouse tilt) ──────── -->
+  <script src="js/main.js"></script>
+
+  <!-- ── 3D scene (ES module, auto-deferred) ───────────────────────────── -->
+  <script type="module" src="js/scene.js"></script>
+
+</body>
+</html>

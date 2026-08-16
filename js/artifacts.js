@@ -16,6 +16,8 @@
 
 import * as THREE from 'three';
 
+const GOLD = 0xF4B942;                   // matches scene.js's design constant
+
 const ARTIFACT_DIAMETER = 0.38;          // normalised target size (world units)
 const FRONT_ANGLE       = Math.PI / 2;  // π/2 = +Z = closest to camera
 const TWO_PI            = Math.PI * 2;
@@ -48,38 +50,52 @@ export class ArtifactManager {
   _loadOne(def, index) {
     return new Promise(resolve => {
       const onLoaded = gltf => {
-        const model = gltf.scene;
+        const rawModel = gltf.scene;
 
         // Apply orientation fix FIRST so bounding-box is computed on correct axes
-        // (Trishool + Kamandal are exported lying flat — X -90° stands them upright)
+        // (Kamandal is exported lying flat — X -90° stands it upright). This fix
+        // is baked into rawModel only — the spin applied in update() happens on
+        // the outer `spinner` wrapper below, so the two rotations never compose
+        // together and the continuous spin always turns around the model's true
+        // vertical axis instead of tumbling.
         if (def.rotationFix) {
-          model.rotation.x = def.rotationFix.x ?? 0;
-          model.rotation.y = def.rotationFix.y ?? 0;
-          model.rotation.z = def.rotationFix.z ?? 0;
-          model.updateWorldMatrix(false, true); // flush rotation before box calc
+          rawModel.rotation.x = def.rotationFix.x ?? 0;
+          rawModel.rotation.y = def.rotationFix.y ?? 0;
+          rawModel.rotation.z = def.rotationFix.z ?? 0;
+          rawModel.updateWorldMatrix(false, true); // flush rotation before box calc
         }
 
         // Normalise to target diameter (on the already-rotated model)
-        const box  = new THREE.Box3().setFromObject(model);
+        const box  = new THREE.Box3().setFromObject(rawModel);
         const size = new THREE.Vector3();
         box.getSize(size);
         const maxDim = Math.max(size.x, size.y, size.z);
-        model.scale.setScalar(ARTIFACT_DIAMETER / maxDim);
+        rawModel.scale.setScalar(ARTIFACT_DIAMETER / maxDim);
 
         // Centre at own origin
         const centre = new THREE.Vector3();
-        new THREE.Box3().setFromObject(model).getCenter(centre);
-        model.position.sub(centre);
+        new THREE.Box3().setFromObject(rawModel).getCenter(centre);
+        rawModel.position.sub(centre);
 
-        // Emissive channel for hover/front glow
-        model.traverse(child => {
+        // Golden material treatment + emissive channel for hover/front glow
+        rawModel.traverse(child => {
           if (!child.isMesh) return;
-          child.material                   = child.material.clone();
-          child.material.emissive          = new THREE.Color(0xF4B942);
+          child.material          = child.material.clone();
+          child.material.color    = new THREE.Color(GOLD);
+          if (child.material.metalness !== undefined) child.material.metalness = Math.max(child.material.metalness, 0.7);
+          if (child.material.roughness !== undefined) child.material.roughness = Math.min(child.material.roughness, 0.35);
+          child.material.emissive          = new THREE.Color(GOLD);
           child.material.emissiveIntensity = 0;
         });
 
-        this._registerItem(model, def, index);
+        // Spinner wrapper: holds no static rotation of its own, so the
+        // continuous self-spin in update() (item.model.rotation.y += …)
+        // always turns around the model's true vertical axis — the same
+        // clean rotation Bel Patta already has, now shared by every artifact.
+        const spinner = new THREE.Group();
+        spinner.add(rawModel);
+
+        this._registerItem(spinner, def, index);
         resolve();
       };
 
@@ -87,10 +103,12 @@ export class ArtifactManager {
         console.warn(`[ArtifactManager] Could not load ${def.path} — using placeholder.`);
         const geo = new THREE.OctahedronGeometry(ARTIFACT_DIAMETER * 0.5, 1);
         const mat = new THREE.MeshStandardMaterial({
-          color: 0xF4B942, emissive: new THREE.Color(0xF4B942),
+          color: GOLD, emissive: new THREE.Color(GOLD),
           emissiveIntensity: 0.4, metalness: 0.6, roughness: 0.25,
         });
-        this._registerItem(new THREE.Mesh(geo, mat), def, index);
+        const spinner = new THREE.Group();
+        spinner.add(new THREE.Mesh(geo, mat));
+        this._registerItem(spinner, def, index);
         resolve();
       };
 
@@ -281,14 +299,56 @@ export class ArtifactManager {
     });
   }
 
-  // ── Click (front item only) ────────────────────────────────────────────────
+  // ── Click (any item — caller decides whether to rotate to front) ───────────
 
   getClickedItem(raycaster) {
     const hits = raycaster.intersectObjects(this._collectMeshes(), false);
     if (!hits.length) return null;
-    const hitItem = this._itemFromObject(hits[0].object);
-    const front   = this.getFrontItem();
-    return (hitItem && hitItem === front) ? hitItem : null;
+    return this._itemFromObject(hits[0].object);
+  }
+
+  isFrontItem(item) {
+    return !!item && item === this.getFrontItem();
+  }
+
+  /**
+   * Rotate the carousel directly (shortest angular path) so that `item`
+   * lands at FRONT_ANGLE. Resolves once the animation completes — or
+   * immediately if the item is already front, or if a rotation is already
+   * in progress (caller should avoid double-triggering via _isAnimating).
+   */
+  rotateToItem(item) {
+    return new Promise(resolve => {
+      if (!item || this.isFrontItem(item)) { resolve(); return; }
+      if (this._isAnimating) { resolve(); return; }
+      this._isAnimating = true;
+
+      const current = this._carouselAngle;
+      let delta = (FRONT_ANGLE - item.baseAngle) - current;
+      // Normalise to shortest path in [-π, π]
+      delta = ((delta % TWO_PI) + TWO_PI) % TWO_PI;
+      if (delta > Math.PI) delta -= TWO_PI;
+      const targetAngle = current + delta;
+
+      if (this.PRM) {
+        this._carouselAngle = targetAngle;
+        this._isAnimating = false;
+        this._highlightFront();
+        resolve();
+        return;
+      }
+
+      window.gsap.to(this, {
+        _carouselAngle: targetAngle,
+        duration:       0.65,
+        ease:           'power2.inOut',
+        onComplete: () => {
+          this._isAnimating = false;
+          this._highlightFront();
+          resolve();
+        },
+      });
+    });
   }
 
   // ── Radial click-pulse (PRD §3.6 C) ───────────────────────────────────────

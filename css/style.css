@@ -6,14 +6,28 @@
 }
 
 /* ── Page navigation (top right) ───────────────────────────────────── */
+/* A dark glass pill behind the nav keeps gold text/pipes legible no matter
+   what sits behind it — a bright video frame, the golden BG.png scene, or
+   a plain dark page background. */
 #page-nav {
   position: fixed;
   top: 3vh;
   right: 4.5vw;
   z-index: 50;
   display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   align-items: center;
   gap: 10px;
+  max-width: 62vw;
+
+  background: rgba(7, 14, 16, 0.55);
+  backdrop-filter: blur(14px) saturate(1.4);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  border: 1px solid rgba(244, 185, 66, 0.20);
+  border-radius: 100px;
+  padding: 0.5rem 1.1rem;
+
   font-family: var(--font-body, 'Outfit', 'Helvetica Neue', Arial, sans-serif);
   font-size: 0.72rem;
   letter-spacing: 0.12em;
@@ -21,7 +35,7 @@
 }
 
 .page-nav-link {
-  color: rgba(243, 230, 207, 0.45);
+  color: rgba(243, 230, 207, 0.6);
   text-decoration: none;
   transition: color 0.3s ease;
 }
@@ -33,11 +47,26 @@
 
 .page-nav-link.active {
   color: var(--gold, var(--accent));
+  cursor: default;
 }
 
 .page-nav-sep {
-  color: rgba(244, 185, 66, 0.3);
+  color: rgba(244, 185, 66, 0.45);
   font-size: 0.7rem;
+}
+
+/* Persistent Banarasi Bhaukal logo — lives inside the navbar so it stays
+   pinned top-right, alongside the nav links, on every page. */
+.nav-logo {
+  height: 26px;
+  width: auto;
+  display: block;
+  margin-right: 6px;
+  filter: drop-shadow(0 0 8px rgba(244, 185, 66, 0.25));
+}
+
+@media (max-width: 700px) {
+  .nav-logo { height: 22px; margin-right: 4px; }
 }
 
 @media (max-width: 700px) {
@@ -46,6 +75,7 @@
     right: 5vw;
     font-size: 0.65rem;
     gap: 8px;
+    padding: 0.4rem 0.85rem;
   }
 }
 
@@ -328,7 +358,13 @@ html, body {
   z-index: 8;
   opacity: 0;
   pointer-events: none;
-  background: radial-gradient(ellipse at 50% 55%, var(--mid-bg) 0%, var(--deep-bg) 100%);
+  background: url('../assets/BG_Space_169.png') center center / cover no-repeat;
+}
+
+@media (max-width: 600px) {
+  #scene-section {
+    background-image: url('../assets/BG_Space_916.png');
+  }
 }
 
 #scene-section.active {
@@ -614,10 +650,9 @@ html, body {
   text-transform: uppercase;
   color: rgba(244, 185, 66, 0.85);
 
-  background: rgba(7, 14, 16, 0.55);
-  backdrop-filter: blur(14px) saturate(1.4);
-  -webkit-backdrop-filter: blur(14px) saturate(1.4);
-  border: 1px solid rgba(244, 185, 66, 0.30);
+  /* No dark glass window here — that treatment is reserved for the navbar. */
+  background: transparent;
+  border: 1px solid rgba(244, 185, 66, 0.45);
   border-radius: 100px;
   padding: 0.65rem 1.35rem;
   cursor: pointer;
@@ -637,9 +672,9 @@ html, body {
 
 #skip-to-3d:hover,
 #skip-to-3d:focus-visible {
-  background: rgba(244, 185, 66, 0.14);
+  background: rgba(244, 185, 66, 0.12);
   color: var(--gold, #F4B942);
-  border-color: rgba(244, 185, 66, 0.6);
+  border-color: rgba(244, 185, 66, 0.75);
   outline: none;
 }
 
@@ -665,11 +700,9 @@ html, body {
   height: 60px;
   border-radius: 50%;
 
-  /* Glassmorphism */
-  background: rgba(7, 14, 16, 0.52);
-  backdrop-filter: blur(18px) saturate(1.5);
-  -webkit-backdrop-filter: blur(18px) saturate(1.5);
-  border: 1px solid rgba(244, 185, 66, 0.28);
+  /* No dark glass window here — that treatment is reserved for the navbar. */
+  background: transparent;
+  border: 1px solid rgba(244, 185, 66, 0.35);
 
   /* Arrow glyph */
   font-size: 1.5rem;
@@ -742,4 +775,78 @@ html, body {
     height: 44px;
     font-size: 1.1rem;
   }
+}
+
+
+/* ── Site footer (shared) ────────────────────────────────────────────── */
+#site-footer {
+  position: relative;
+  z-index: 30;
+  min-height: 33vh;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  padding: 48px 6vw;
+  background: var(--bg-color);
+  border-top: 1px solid rgba(244, 185, 66, 0.16);
+}
+
+.footer-col--left { display: flex; flex-direction: column; gap: 8px; }
+
+.footer-copy {
+  font-family: var(--font-body, 'Outfit', sans-serif);
+  font-size: 0.82rem;
+  color: rgba(243, 230, 207, 0.55);
+}
+
+.footer-credit {
+  font-family: var(--font-body, 'Outfit', sans-serif);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(244, 185, 66, 0.65);
+}
+
+.footer-col--right {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.footer-nav { display: flex; gap: 18px; flex-wrap: wrap; }
+
+.footer-nav a {
+  font-family: var(--font-body, 'Outfit', sans-serif);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(243, 230, 207, 0.6);
+  text-decoration: none;
+  transition: color 0.25s ease;
+}
+
+.footer-nav a:hover,
+.footer-nav a:focus-visible { color: var(--gold, var(--accent)); }
+
+.footer-logo { height: 78px; width: auto; display: block; }
+
+@media (max-width: 700px) {
+  .footer-logo { height: 60px; }
+}
+
+@media (max-width: 700px) {
+  #site-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 40px 6vw;
+    gap: 24px;
+    min-height: auto;
+  }
+  .footer-col--right { justify-content: flex-start; }
 }

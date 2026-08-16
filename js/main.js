@@ -74,21 +74,22 @@ if (!prefersReducedMotion) {
 }
 
 /* ---------------------------------- */
-/* Mouse parallax tilt                 */
+/* Mouse parallax (text only)          */
+/*                                     */
+/* The 3D rotateX/rotateY tilt on heroStage (which wraps the video) is    */
+/* removed — that perspective tilt was revealing a grey backface/edge     */
+/* layer on the video as it rotated with the cursor. The subtle text      */
+/* parallax on heroCopy is unrelated to the video and stays.              */
 /* ---------------------------------- */
 if (!prefersReducedMotion && !window.matchMedia("(hover: none)").matches) {
-  const rotateX = gsap.quickTo(heroStage, "rotationX", { duration: 0.8, ease: "power3.out" });
-  const rotateY = gsap.quickTo(heroStage, "rotationY", { duration: 0.8, ease: "power3.out" });
-  const moveX   = gsap.quickTo(heroCopy,  "x",         { duration: 1,   ease: "power3.out" });
-  const moveY   = gsap.quickTo(heroCopy,  "y",         { duration: 1,   ease: "power3.out" });
+  const moveX = gsap.quickTo(heroCopy, "x", { duration: 1, ease: "power3.out" });
+  const moveY = gsap.quickTo(heroCopy, "y", { duration: 1, ease: "power3.out" });
 
   document.getElementById("hero").addEventListener("mousemove", (e) => {
     const { innerWidth, innerHeight } = window;
     const nx = (e.clientX / innerWidth  - 0.5) * 2;
     const ny = (e.clientY / innerHeight - 0.5) * 2;
 
-    rotateX(ny * -3);
-    rotateY(nx *  4);
     moveX(nx * -14);
     moveY(ny * -10);
   });

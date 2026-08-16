@@ -67,23 +67,6 @@ const ARTIFACT_DEFS = [
     ],
   },
   {
-    id: 'trishool',
-    name: 'Trishool',
-    icon: '🔱',
-    category: 'Heritage',
-    path: 'assets/trishool.glb',
-    rotationFix: { x: -Math.PI / 2, y: 0, z: 0 },
-    story:
-      'The divine trident embodies the Trimurti — creation, preservation, and ' +
-      'dissolution. Planted in the sacred soil of Kashi, it marks the cosmic axis ' +
-      'where all three states of time converge into the eternal present.',
-    articles: [
-      { title: 'Kashi as the Axis Mundi', desc: 'Why the ancient texts call Varanasi the navel of the universe — and how the trishool planted by Shiva anchors that cosmological claim.' },
-      { title: 'The Trimurti in Stone', desc: 'Sculptural evolution of the trishool from Indus Valley seals to the monumental iconography of the Vishwanath Corridor.' },
-      { title: 'Shakti Peethas of Kashi', desc: 'The 64 sacred spots of the city and how each relates to one of the three prongs: creative force, sustaining force, dissolving force.' },
-    ],
-  },
-  {
     id: 'diya',
     name: 'Ganga Diya',
     icon: '🪔',
@@ -124,6 +107,15 @@ class KashiScene {
     this.raycaster   = new THREE.Raycaster();
     this.pointer     = new THREE.Vector2(-2, -2); // off-screen default
 
+    // Drag-to-orbit camera state (mouse-driven; object itself never moves)
+    this._orbit = {
+      theta: 0, phi: 1.2, targetTheta: 0, targetPhi: 1.2,
+      radius: 7, target: new THREE.Vector3(0, 0, 0),
+    };
+    this._dragging  = false;
+    this._dragMoved = false;
+    this._lastPtr   = { x: 0, y: 0 };
+
     this.isReady     = false;
     this.PRM         = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   }
@@ -135,6 +127,7 @@ class KashiScene {
     this._setupRenderer();
     this._setupCamera();
     this._setupLights();
+    this._addSceneBackground();
     this._addStarfield();
     this._setupLoader();
     this._setupEvents();
@@ -144,17 +137,32 @@ class KashiScene {
     window.addEventListener('hero:complete', () => this._begin(), { once: true });
   }
 
+  // ── Scene background — responsive: portrait 9:16 space backdrop on
+  //    phones, widescreen 16:9 backdrop on everything else. ─────────────
+  _addSceneBackground() {
+    const isPhone = window.matchMedia('(max-width: 600px)').matches;
+    const file = isPhone ? 'assets/BG_Space_916.png' : 'assets/BG_Space_169.png';
+    const loader = new THREE.TextureLoader();
+    loader.load(file, texture => {
+      texture.colorSpace = THREE.SRGBColorSpace;
+      this.scene.background = texture;
+    });
+  }
+
   // ── Starfield + fog ──────────────────────────────────────────────────────
   _addStarfield() {
-    // Subtle exponential fog: deepens sense of sacred space
-    this.scene.fog = new THREE.FogExp2(0x070E10, 0.035);
+    // Warm amber haze — matches the BG.png sunrise backdrop instead of the
+    // flat white it replaced, so distant geometry blends into the image.
+    this.scene.fog = new THREE.FogExp2(0xE3A34E, 0.02);
 
-    // ~800 gold-tinted stars distributed in a large sphere
+    // ~800 amber/gold flecks distributed in a large sphere — recoloured
+    // away from gold↔white toward gold↔deep-amber so they still read as
+    // visible flecks against the new white background instead of vanishing.
     const count    = 800;
     const positions = new Float32Array(count * 3);
     const colors    = new Float32Array(count * 3);
-    const goldVec   = new THREE.Color(0xF4B942);
-    const whiteVec  = new THREE.Color(0xfff8e0);
+    const goldVec   = new THREE.Color(0xC8973A);
+    const amberVec  = new THREE.Color(0x8B5E1F);
 
     for (let i = 0; i < count; i++) {
       const r     = 20 + Math.random() * 30;
@@ -165,8 +173,8 @@ class KashiScene {
       positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
       positions[i * 3 + 2] = r * Math.cos(phi);
 
-      // Mix gold ↔ white randomly for visual richness
-      const c = goldVec.clone().lerp(whiteVec, Math.random() * 0.6);
+      // Mix gold ↔ deep-amber randomly for visual richness
+      const c = goldVec.clone().lerp(amberVec, Math.random() * 0.6);
       colors[i * 3]     = c.r;
       colors[i * 3 + 1] = c.g;
       colors[i * 3 + 2] = c.b;
@@ -180,7 +188,7 @@ class KashiScene {
       size:         0.06,
       vertexColors: true,
       transparent:  true,
-      opacity:      0.7,
+      opacity:      0.55,
       sizeAttenuation: true,
       depthWrite:   false,
     });
@@ -224,7 +232,9 @@ class KashiScene {
     this.renderer.outputColorSpace    = THREE.SRGBColorSpace;
     this.renderer.toneMapping         = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.3;
-    this.renderer.setClearColor(0x070E10, 1);
+    // Warm amber fallback (matches BG.png) shown only in the brief window
+    // before the background texture finishes loading.
+    this.renderer.setClearColor(0xE3A34E, 1);
   }
 
   // ── Camera ───────────────────────────────────────────────────────────────
@@ -238,6 +248,16 @@ class KashiScene {
     // Pull back for good framing of the larger model
     this.camera.position.set(0, 1.4, 7);
     this.camera.lookAt(0, 0, 0);
+
+    // Derive the initial orbit spherical coordinates from that starting
+    // position so drag-to-orbit picks up exactly where the fixed camera
+    // used to sit (see _setupOrbitControls / render loop).
+    const p = this.camera.position;
+    this._orbit.radius = p.length();
+    this._orbit.theta  = Math.atan2(p.x, p.z);
+    this._orbit.phi    = Math.acos(THREE.MathUtils.clamp(p.y / this._orbit.radius, -1, 1));
+    this._orbit.targetTheta = this._orbit.theta;
+    this._orbit.targetPhi   = this._orbit.phi;
   }
 
   // ── Lights ───────────────────────────────────────────────────────────────
@@ -255,6 +275,18 @@ class KashiScene {
     const key = new THREE.DirectionalLight(0xffffff, 1.6);
     key.position.set(2, 4, 3);
     this.scene.add(key);
+
+    // Front light — positioned near the camera's line of sight so the face
+    // of the model the viewer actually sees is well lit, not just its top/sides.
+    // Boosted intensity + a soft second front source for fuller, flatter-shadow
+    // frontal coverage of the temple face.
+    const front = new THREE.DirectionalLight(0xffffff, 2.2);
+    front.position.set(0, 1.6, 6);
+    this.scene.add(front);
+
+    const frontFill = new THREE.DirectionalLight(0xfff6e6, 1.1);
+    frontFill.position.set(1.2, 1.0, 6.5);
+    this.scene.add(frontFill);
 
     // Secondary fill directional (neutral, opposite side) — softens shadows
     // and adds coverage the original single-key setup was missing
@@ -299,6 +331,8 @@ class KashiScene {
     this.canvas.addEventListener('mousemove', e => updatePointer(e.clientX, e.clientY));
 
     this.canvas.addEventListener('click', e => {
+      // A drag that just ended shouldn't also register as an artifact click.
+      if (this._dragMoved) { this._dragMoved = false; return; }
       updatePointer(e.clientX, e.clientY);
       if (this.isReady) this._handleClick();
     });
@@ -325,6 +359,61 @@ class KashiScene {
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') this._closeModal();
     });
+
+    this._setupOrbitControls();
+  }
+
+  // ── Drag-to-orbit camera (mouse only) ───────────────────────────────────
+  // The temple never moves — only the camera swings around it on a sphere,
+  // so users can drag to rotate the model, including down to a top view,
+  // while its place in the scene stays fixed.
+  _setupOrbitControls() {
+    const ORBIT_SPEED = 0.006;
+    // How close to straight up/down the camera may swing.
+    const PHI_MIN = 0.08;                 // near top-down view
+    const PHI_MAX = Math.PI - 0.35;       // stop just short of straight underneath
+
+    this.canvas.addEventListener('mousedown', e => {
+      this._dragging  = true;
+      this._dragMoved = false;
+      this._lastPtr.x = e.clientX;
+      this._lastPtr.y = e.clientY;
+    });
+
+    window.addEventListener('mousemove', e => {
+      if (!this._dragging) return;
+      const dx = e.clientX - this._lastPtr.x;
+      const dy = e.clientY - this._lastPtr.y;
+      if (Math.abs(dx) > 2 || Math.abs(dy) > 2) this._dragMoved = true;
+      this._lastPtr.x = e.clientX;
+      this._lastPtr.y = e.clientY;
+
+      this._orbit.targetTheta -= dx * ORBIT_SPEED;
+      this._orbit.targetPhi   -= dy * ORBIT_SPEED;
+      this._orbit.targetPhi   = THREE.MathUtils.clamp(this._orbit.targetPhi, PHI_MIN, PHI_MAX);
+    });
+
+    window.addEventListener('mouseup', () => { this._dragging = false; });
+    window.addEventListener('mouseleave', () => { this._dragging = false; });
+
+    this.canvas.style.cursor = 'grab';
+    this.canvas.addEventListener('mousedown', () => { this.canvas.style.cursor = 'grabbing'; });
+    window.addEventListener('mouseup', () => { this.canvas.style.cursor = 'grab'; });
+  }
+
+  // Recompute camera position from spherical coords each frame, with a
+  // light damping ease toward the drag target for a smooth feel.
+  _updateOrbitCamera() {
+    const o = this._orbit;
+    o.theta += (o.targetTheta - o.theta) * 0.12;
+    o.phi   += (o.targetPhi   - o.phi)   * 0.12;
+
+    this.camera.position.set(
+      o.target.x + o.radius * Math.sin(o.phi) * Math.sin(o.theta),
+      o.target.y + o.radius * Math.cos(o.phi),
+      o.target.z + o.radius * Math.sin(o.phi) * Math.cos(o.theta),
+    );
+    this.camera.lookAt(o.target);
   }
 
   // ── Cinematic entrance sequence ──────────────────────────────────────────
@@ -333,6 +422,7 @@ class KashiScene {
 
     try {
       await this._loadTemple();
+      this._addTempleGlow();
     } catch (err) {
       console.warn('[KashiScene] Temple model failed to load:', err);
       this._hint('Press any artifact to explore');
@@ -439,6 +529,41 @@ class KashiScene {
     });
   }
 
+  // ── Glowy outline (rim-glow silhouette) ──────────────────────────────────
+  // Reusable on any loaded object: clones the whole hierarchy (transforms
+  // preserved), swaps every mesh's material for a back-face additive glow
+  // material, then puffs it out slightly — the original mesh occludes the
+  // front faces, leaving only a glowing rim. Parented under `object` so the
+  // glow inherits its transform/animation automatically.
+  _addGlowOutline(object, opts = {}) {
+    if (!object) return null;
+
+    const glowMat = new THREE.MeshBasicMaterial({
+      color:       opts.color   ?? GOLD,
+      side:        THREE.BackSide,
+      transparent: true,
+      opacity:     opts.opacity ?? 0.5,
+      blending:    THREE.AdditiveBlending,
+      depthWrite:  false,
+    });
+
+    const glow = object.clone(true);
+    glow.traverse(child => {
+      if (child.isMesh) child.material = glowMat;
+    });
+    glow.position.set(0, 0, 0);
+    glow.rotation.set(0, 0, 0);
+    glow.scale.setScalar(opts.scale ?? 1.035);
+
+    object.add(glow);
+    return glow;
+  }
+
+  _addTempleGlow() {
+    if (!this.temple) return;
+    this._templeGlow = this._addGlowOutline(this.temple, { color: GOLD, opacity: 0.5, scale: 1.035 });
+  }
+
   // ── Temple entrance animation ────────────────────────────────────────────
   _animateTempleIn() {
     if (!this.temple) return Promise.resolve();
@@ -469,9 +594,11 @@ class KashiScene {
   }
 
   // ── Golden aura (PRD §3.3) ───────────────────────────────────────────────
+  // Inner revolving halo — a ring of small bel patra (bael leaf) clusters
+  // orbiting the temple, replacing the earlier plain gold spheres. This is
+  // the only revolving particle layer left around the model; the outer
+  // water-sphere shell (and its chime sound) has been removed entirely.
   _addGoldenAura() {
-    // Approach: pure PointLight pulse + a thin equatorial particle ring.
-    // No solid sphere mesh — that was rendering as an opaque dome over the scene.
     const gsap = window.gsap;
 
     // 1. Pulsing golden PointLight
@@ -487,65 +614,110 @@ class KashiScene {
       });
     }
 
-    // 2. Equatorial particle halo — 180 golden points in a ring
-    const count     = 180;
-    const r         = this._normScale * 1.18;
-    const positions = new Float32Array(count * 3);
-    const baseY     = this.temple ? this.temple.position.y : 0;
+    // 2. Equatorial halo — ring of small bel patra leaf clusters
+    const count = 90;
+    const r     = this._normScale * 1.18;
+    const baseY = this.temple ? this.temple.position.y : 0;
 
-    for (let i = 0; i < count; i++) {
-      const theta          = (i / count) * Math.PI * 2;
-      positions[i * 3]     = r * Math.cos(theta);
-      positions[i * 3 + 1] = baseY + (Math.random() - 0.5) * 0.20;
-      positions[i * 3 + 2] = r * Math.sin(theta);
-    }
-
-    const geo = new THREE.BufferGeometry();
-    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-
-    const mat = new THREE.PointsMaterial({
-      color:           0xF4B942,
-      size:            0.045,
-      transparent:     true,
-      opacity:         0,
-      depthWrite:      false,
-      blending:        THREE.AdditiveBlending,
-      sizeAttenuation: true,
+    const leafMat = new THREE.MeshStandardMaterial({
+      color:             GOLD,
+      emissive:          new THREE.Color(GOLD),
+      emissiveIntensity: 0.55,
+      metalness:         0.85,
+      roughness:         0.28,
+      transparent:       true,
+      opacity:           0,
+      depthWrite:        false,
+      side:              THREE.DoubleSide,
     });
 
-    this._auraRing = new THREE.Points(geo, mat);
+    const ring = new THREE.Group();
+    this._auraRing = ring;
     this.scene.add(this._auraRing);
 
-    // Fade halo in
-    gsap.to(mat, { opacity: 0.75, duration: 0.9, ease: 'power2.out', delay: 0.2 });
+    this.gltfLoader.load(
+      'assets/bel_patta.glb',
+      gltf => {
+        const template = gltf.scene;
+        template.traverse(child => {
+          if (child.isMesh) child.material = leafMat;
+        });
 
-    // Gentle pulse on halo opacity too
-    if (!this.PRM) {
-      gsap.to(mat, {
-        opacity: 0.35,
-        duration: 2.5,
-        ease:     'sine.inOut',
-        yoyo:     true,
-        repeat:   -1,
-        delay:    1.2,
-      });
-    }
+        // Normalise a single leaf cluster to a small, consistent size.
+        const box  = new THREE.Box3().setFromObject(template);
+        const size = new THREE.Vector3();
+        box.getSize(size);
+        const maxDim    = Math.max(size.x, size.y, size.z) || 1;
+        const leafScale = 0.16 / maxDim;
+
+        for (let i = 0; i < count; i++) {
+          const theta = (i / count) * Math.PI * 2;
+          const leaf  = template.clone(true);
+          leaf.position.set(
+            r * Math.cos(theta),
+            baseY + (Math.random() - 0.5) * 0.20,
+            r * Math.sin(theta),
+          );
+          leaf.rotation.set(
+            Math.random() * Math.PI,
+            theta + Math.PI / 2,
+            Math.random() * 0.4 - 0.2,
+          );
+          leaf.scale.setScalar(leafScale * (0.85 + Math.random() * 0.3));
+          ring.add(leaf);
+        }
+
+        // Fade halo in
+        gsap.to(leafMat, { opacity: 0.92, duration: 0.9, ease: 'power2.out', delay: 0.2 });
+
+        // Gentle pulse on halo opacity too
+        if (!this.PRM) {
+          gsap.to(leafMat, {
+            opacity:  0.55,
+            duration: 2.5,
+            ease:     'sine.inOut',
+            yoyo:     true,
+            repeat:   -1,
+            delay:    1.2,
+          });
+        }
+      },
+      undefined,
+      err => console.warn('[KashiScene] bel_patta aura ring failed to load:', err),
+    );
   }
 
   // ── Click handler ────────────────────────────────────────────────────────
+  // Clicking ANY artifact — front or not — brings it to front (rotating the
+  // carousel there first if needed) and then opens it exactly as a
+  // front-item click always has.
   _handleClick() {
     if (!this.artifactMgr) return;
     this.raycaster.setFromCamera(this.pointer, this.camera);
     const hit = this.artifactMgr.getClickedItem(this.raycaster);
     if (!hit) return;
 
-    // Radial pulse from artifact position (PRD §3.6 C)
-    this.artifactMgr.spawnPulse(
-      hit.group.position.clone(),
-      this.scene,
-      this.camera,
-    );
-    this._openModal(hit.data, hit);
+    const openHitItem = () => {
+      // Radial pulse from artifact position (PRD §3.6 C)
+      this.artifactMgr.spawnPulse(
+        hit.group.position.clone(),
+        this.scene,
+        this.camera,
+      );
+      this._openModal(hit.data, hit);
+    };
+
+    if (this.artifactMgr.isFrontItem(hit)) {
+      openHitItem();
+      return;
+    }
+
+    // Not front yet — rotate the carousel straight to it, then open.
+    this.isReady = false; // pause hover/click handling during the spin
+    this.artifactMgr.rotateToItem(hit).then(() => {
+      this.isReady = true;
+      openHitItem();
+    });
   }
 
   // ── Focused state: open (PRD §9–15) ──────────────────────────────────────────────────
@@ -680,12 +852,17 @@ class KashiScene {
       const delta   = this.clock.getDelta();
       const elapsed = this.clock.getElapsedTime();
 
-      // Slowly rotate the aura particle ring
+      // Slowly rotate the aura particle ring — clockwise (as viewed from
+      // the camera / from above), reversed from its original anti-clockwise spin.
       if (this._auraRing && !this.PRM) {
-        this._auraRing.rotation.y += 0.0015;
+        this._auraRing.rotation.y -= 0.0015;
       }
 
       // Note: temple no longer drifts — it stays at its entrance-spin endpoint
+
+      // Camera orbit — recompute every frame so the drag ease stays smooth
+      // even when the pointer isn't moving.
+      this._updateOrbitCamera();
 
       if (this.isReady && this.artifactMgr) {
         this.artifactMgr.update(delta, elapsed);
