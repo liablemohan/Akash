@@ -242,25 +242,39 @@ class KashiScene {
 
   // ── Lights ───────────────────────────────────────────────────────────────
   _setupLights() {
-    // Warm ambient fill
-    this.scene.add(new THREE.AmbientLight(GOLD, 0.55));
+    // Soft neutral ambient — lets the model's own material colors read through
+    // instead of being washed in a single warm tint
+    this.scene.add(new THREE.AmbientLight(0xffffff, 0.35));
 
-    // Key directional (warm white)
-    const key = new THREE.DirectionalLight(0xfff8e8, 1.4);
+    // Hemisphere light (cool sky / warm ground) adds gentle color variation
+    // and depth without dominating the model with one hue
+    const hemi = new THREE.HemisphereLight(0xf4f6fb, 0x3a2f1a, 0.5);
+    this.scene.add(hemi);
+
+    // Key directional — neutral daylight white, brighter for clearer definition
+    const key = new THREE.DirectionalLight(0xffffff, 1.6);
     key.position.set(2, 4, 3);
     this.scene.add(key);
 
-    // Rim / backlight (amber from behind-left)
-    const rim = new THREE.DirectionalLight(AMBER, 0.8);
+    // Secondary fill directional (neutral, opposite side) — softens shadows
+    // and adds coverage the original single-key setup was missing
+    const fillSide = new THREE.DirectionalLight(0xeef2ff, 0.65);
+    fillSide.position.set(-2, 2, 4);
+    this.scene.add(fillSide);
+
+    // Rim / backlight — kept as a subtle amber accent, dialed back so it
+    // no longer overpowers the model's true colors
+    const rim = new THREE.DirectionalLight(AMBER, 0.45);
     rim.position.set(-3, 1, -2);
     this.scene.add(rim);
 
-    // Fill from below (bounce light warmth)
-    const fill = new THREE.DirectionalLight(0xF4B942, 0.3);
+    // Fill from below — neutral bounce (previously gold-tinted)
+    const fill = new THREE.DirectionalLight(0xffffff, 0.35);
     fill.position.set(0, -2, 2);
     this.scene.add(fill);
 
-    // Golden point light for aura effect (off until temple lands)
+    // Golden point light for aura effect (off until temple lands) —
+    // kept as an intentional accent moment, not baseline lighting
     this.auraLight = new THREE.PointLight(GOLD, 0, 12);
     this.scene.add(this.auraLight);
   }
@@ -388,7 +402,7 @@ class KashiScene {
   _loadTemple() {
     return new Promise((resolve, reject) => {
       this.gltfLoader.load(
-        'assets/vt_corridor.glb',
+        'assets/kashi.glb',
         gltf => {
           this.temple = gltf.scene;
 

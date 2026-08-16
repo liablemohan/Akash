@@ -22,12 +22,28 @@
 </head>
 <body>
 
-  <!-- ── Phase 1: Pure CSS ASCII preloader (visible before any JS) ──────── -->
+  <!-- ── Page navigation (top right) ─────────────────────────────────── -->
+  <nav id="page-nav" aria-label="Page navigation">
+    <a href="index.html" class="page-nav-link active">index.html</a>
+    <span class="page-nav-sep">/</span>
+    <a href="page3.html" class="page-nav-link">page3.html</a>
+  </nav>
+
+  <!-- ── Preloader: sequential logo reveal + golden loading bar ─────────── -->
   <div id="loader">
-    <div class="ascii"></div>
+    <div class="loader-stage" aria-hidden="true">
+      <img class="loader-img" src="loading_images/1_cropped.png" alt="" loading="eager" fetchpriority="high">
+      <img class="loader-img" src="loading_images/2_cropped.png" alt="" loading="eager" fetchpriority="high">
+      <img class="loader-img" src="loading_images/3_cropped.png" alt="" loading="eager" fetchpriority="high">
+      <img class="loader-img" src="loading_images/4_cropped.png" alt="" loading="eager" fetchpriority="high">
+      <img class="loader-img" src="loading_images/5_cropped.png" alt="" loading="eager" fetchpriority="high">
+    </div>
+    <div class="loader-bar-track">
+      <div class="loader-bar-fill"></div>
+    </div>
   </div>
 
-  <!-- ── SVG filter defs: chromatic aberration + film grain ────────────── -->
+  <!-- ── SVG filter defs: chromatic aberration ────────────── -->
   <svg class="defs" width="0" height="0" aria-hidden="true">
     <defs>
       <filter id="chromaticAberration" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
@@ -38,10 +54,6 @@
         <feOffset in="b" dx="0.8" dy="0" result="bOffset"/>
         <feComposite in="rOffset" in2="g" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" result="rg"/>
         <feComposite in="rg" in2="bOffset" operator="arithmetic" k1="0" k2="1" k3="1" k4="0"/>
-      </filter>
-      <filter id="grainFilter">
-        <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="2" stitchTiles="stitch" result="noise"/>
-        <feColorMatrix in="noise" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0.05 0.05 0.05 0 0"/>
       </filter>
     </defs>
   </svg>
@@ -59,16 +71,13 @@
         <video
           class="hero-video"
           id="heroVideo"
-          src="assets/hero.mp4"
+          src="assets/hero2.mp4"
           autoplay
           muted
           playsinline
           preload="auto"
         ></video>
         <div class="vignette"></div>
-        <svg class="grain" id="grainOverlay" preserveAspectRatio="none" aria-hidden="true">
-          <rect width="100%" height="100%" filter="url(#grainFilter)"></rect>
-        </svg>
       </div>
 
       <div class="hero-copy">

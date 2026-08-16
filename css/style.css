@@ -5,6 +5,50 @@
   --ease-out-cubic: cubic-bezier(0.33, 1, 0.68, 1);
 }
 
+/* ── Page navigation (top right) ───────────────────────────────────── */
+#page-nav {
+  position: fixed;
+  top: 3vh;
+  right: 4.5vw;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-body, 'Outfit', 'Helvetica Neue', Arial, sans-serif);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.page-nav-link {
+  color: rgba(243, 230, 207, 0.45);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.page-nav-link:hover,
+.page-nav-link:focus-visible {
+  color: var(--gold, var(--accent));
+}
+
+.page-nav-link.active {
+  color: var(--gold, var(--accent));
+}
+
+.page-nav-sep {
+  color: rgba(244, 185, 66, 0.3);
+  font-size: 0.7rem;
+}
+
+@media (max-width: 700px) {
+  #page-nav {
+    top: 2.2vh;
+    right: 5vw;
+    font-size: 0.65rem;
+    gap: 8px;
+  }
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -20,13 +64,14 @@ html, body {
 }
 
 /* ---------------------------------- */
-/* Phase 1 — pure CSS ASCII preloader  */
+/* Phase 1 — sequential logo preloader */
 /* ---------------------------------- */
 #loader {
   position: fixed;
   inset: 0;
   z-index: 999;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   background: var(--bg-color);
@@ -34,33 +79,67 @@ html, body {
   will-change: opacity;
 }
 
-.ascii {
-  font-family: "SF Mono", "Menlo", monospace;
-  font-size: 14px;
-  letter-spacing: 0.3em;
-  color: var(--accent);
-  opacity: 0.85;
+/* Stacked, cross-fading logo frames (1..5), centered mid-page */
+.loader-stage {
+  position: relative;
+  width: min(300px, 62vw);
+  aspect-ratio: 508 / 465;
 }
 
-.ascii::before {
-  content: '---===+++';
-  animation: ascii-cycle 2.4s steps(12) infinite;
+.loader-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0;
+  filter: drop-shadow(0 0 26px rgba(232, 165, 69, 0.28));
+  animation: loader-cycle 5s cubic-bezier(0.45, 0, 0.2, 1) infinite;
 }
 
-@keyframes ascii-cycle {
-  0%   { content: '---===+++==='; }
-  8%   { content: '+++---===+++'; }
-  16%  { content: '===+++---==='; }
-  25%  { content: '+++===---+++'; }
-  33%  { content: '---+++===---'; }
-  41%  { content: '===---+++==='; }
-  50%  { content: '+++===+++---'; }
-  58%  { content: '---===---+++'; }
-  66%  { content: '===+++===---'; }
-  75%  { content: '+++---+++==='; }
-  83%  { content: '===---===+++'; }
-  91%  { content: '---+++---==='; }
-  100% { content: '---===+++==='; }
+.loader-img:nth-child(1) { animation-delay: 0s; }
+.loader-img:nth-child(2) { animation-delay: -1s; }
+.loader-img:nth-child(3) { animation-delay: -2s; }
+.loader-img:nth-child(4) { animation-delay: -3s; }
+.loader-img:nth-child(5) { animation-delay: -4s; }
+
+@keyframes loader-cycle {
+  0%   { opacity: 0; transform: scale(0.97); }
+  6%   { opacity: 1; transform: scale(1); }
+  16%  { opacity: 1; transform: scale(1); }
+  22%  { opacity: 0; transform: scale(1.02); }
+  100% { opacity: 0; transform: scale(1.02); }
+}
+
+/* Golden loading bar — rolls in step with each frame change */
+.loader-bar-track {
+  position: relative;
+  width: min(210px, 46vw);
+  height: 3px;
+  margin-top: 34px;
+  background: rgba(232, 165, 69, 0.16);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.loader-bar-fill {
+  position: absolute;
+  top: 0; left: 0;
+  height: 100%;
+  width: 42%;
+  border-radius: 3px;
+  background: linear-gradient(90deg,
+    transparent,
+    var(--accent) 30%,
+    #fff3d6 50%,
+    var(--accent) 70%,
+    transparent);
+  animation: loader-bar-roll 1s linear infinite;
+}
+
+@keyframes loader-bar-roll {
+  0%   { transform: translateX(-120%); }
+  100% { transform: translateX(340%); }
 }
 
 /* ---------------------------------- */
@@ -99,16 +178,6 @@ html, body {
   inset: 0;
   background: radial-gradient(ellipse at 50% 55%, transparent 35%, rgba(0,0,0,0.35) 78%, rgba(0,0,0,0.75) 100%);
   mix-blend-mode: multiply;
-  pointer-events: none;
-}
-
-.grain {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0.5;
-  mix-blend-mode: overlay;
   pointer-events: none;
 }
 

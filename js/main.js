@@ -2,24 +2,14 @@ gsap.registerPlugin(ScrollTrigger);
 
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-const loader   = document.getElementById("loader");
-const ascii    = loader.querySelector(".ascii");
+const loader     = document.getElementById("loader");
+const loaderContent = [loader.querySelector(".loader-stage"), loader.querySelector(".loader-bar-track")];
 const video    = document.getElementById("heroVideo");
 const heroStage  = document.getElementById("heroStage");
 const heroCopy   = document.querySelector(".hero-copy");
 const scrollCue  = document.querySelector(".scroll-cue");
 const caOffset   = document.querySelector("#chromaticAberration feOffset:nth-of-type(1)");
 const caOffsetB  = document.querySelectorAll("#chromaticAberration feOffset")[1];
-const grainNoise = document.querySelector("#grainFilter feTurbulence");
-
-/* ---------------------------------- */
-/* Film grain flicker (~12fps)         */
-/* ---------------------------------- */
-if (!prefersReducedMotion) {
-  setInterval(() => {
-    grainNoise.setAttribute("seed", Math.floor(Math.random() * 100));
-  }, 80);
-}
 
 /* ---------------------------------- */
 /* Preloader -> intro reveal           */
@@ -27,7 +17,7 @@ if (!prefersReducedMotion) {
 function playIntro() {
   const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
-  tl.to(ascii, { opacity: 0, duration: 0.25 })
+  tl.to(loaderContent, { opacity: 0, duration: 0.25 })
     .to(loader, {
       opacity: 0,
       duration: 0.75,
