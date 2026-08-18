@@ -319,16 +319,27 @@
       opacity: 0.45;
     }
 
-    /* ─── Page Navigation (top right) ─── */
+    /* ─── Site logo (top right, standalone) ─── */
+    #site-logo {
+      position: fixed;
+      top: 32px; right: 48px;
+      z-index: 55;
+      height: 32px;
+      width: auto;
+      display: block;
+      filter: drop-shadow(0 0 8px rgba(200, 151, 58, 0.3));
+    }
+
+    /* ─── Page Navigation (top left) ─── */
     /* Dark glass pill keeps gold text/pipes legible against any frame of
        the scroll journey behind it. */
     #page-nav {
       position: fixed;
-      top: 32px; right: 48px;
+      top: 32px; left: 48px;
       z-index: 50;
       display: flex;
       flex-wrap: wrap;
-      justify-content: flex-end;
+      justify-content: flex-start;
       align-items: center;
       gap: 10px;
       max-width: 62vw;
@@ -354,12 +365,59 @@
     .page-nav-link:focus-visible { color: var(--gold); }
     .page-nav-link.active { color: var(--gold); cursor: default; }
     .page-nav-sep { color: rgba(200, 151, 58, 0.5); font-size: 10px; }
-    .nav-logo {
+
+    /* ─── Mobile hamburger toggle ("tripundra" 3-line icon) ─── */
+    .nav-toggle {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 5px;
+      width: 24px;
       height: 24px;
-      width: auto;
+      background: none;
+      border: none;
+      padding: 0;
+      margin-right: 2px;
+      cursor: pointer;
+    }
+    .nav-toggle span {
       display: block;
-      margin-right: 4px;
-      filter: drop-shadow(0 0 8px rgba(200, 151, 58, 0.3));
+      width: 19px;
+      height: 2px;
+      border-radius: 2px;
+      background: var(--gold);
+      transition: transform 0.3s ease, opacity 0.25s ease;
+    }
+    .nav-toggle[aria-expanded="true"] span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .nav-toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+    .nav-toggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+    .page-nav-links { display: contents; }
+    @media (max-width: 900px) {
+      .nav-toggle { display: flex; }
+      #page-nav { align-items: center; }
+      .page-nav-links {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        width: 100%;
+        max-height: 0;
+        overflow: hidden;
+        opacity: 0;
+        pointer-events: none;
+        transition: max-height 0.35s ease, opacity 0.3s ease, margin-top 0.35s ease;
+      }
+      .page-nav-links.open {
+        max-height: 60vh;
+        opacity: 1;
+        pointer-events: auto;
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid rgba(200, 151, 58, 0.2);
+      }
+      #page-nav.nav-open { border-radius: 24px; }
+      .page-nav-sep { display: none; }
     }
 
     /* ─── Site footer ─── */
@@ -370,13 +428,31 @@
       width: 100%;
       box-sizing: border-box;
       display: flex;
-      flex-wrap: wrap;
+      flex-direction: column;
       align-items: center;
-      justify-content: space-between;
-      gap: 32px;
+      justify-content: center;
+      gap: 28px;
       padding: 48px 6vw;
       background: var(--ink-solid);
       border-top: 1px solid rgba(200, 151, 58, 0.18);
+    }
+    .foot-crafted {
+      order: -1;
+      font-family: 'EB Garamond', serif;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      text-align: center;
+      color: var(--gold);
+    }
+    .footer-main {
+      width: 100%;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 32px;
     }
     .footer-col--left { display: flex; flex-direction: column; gap: 8px; }
     .footer-copy {
@@ -384,21 +460,19 @@
       font-size: 13px;
       color: rgba(245, 236, 215, 0.5);
     }
-    .footer-credit {
-      font-family: 'EB Garamond', serif;
-      font-size: 11px;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: rgba(200, 151, 58, 0.65);
-    }
     .footer-col--right {
       display: flex;
-      align-items: center;
-      gap: 28px;
+      align-items: flex-end;
+      gap: 20px;
       flex-wrap: wrap;
       justify-content: flex-end;
     }
-    .footer-nav { display: flex; gap: 18px; flex-wrap: wrap; }
+    .footer-nav {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 10px;
+    }
     .footer-nav a {
       font-family: 'EB Garamond', serif;
       font-size: 12px;
@@ -414,38 +488,45 @@
 
     @media (max-width: 700px) {
       #site-footer {
-        flex-direction: column;
         align-items: flex-start;
         padding: 40px 6vw;
         gap: 24px;
         min-height: auto;
       }
-      .footer-col--right { justify-content: flex-start; }
+      .foot-crafted { text-align: left; width: 100%; font-size: 13px; }
+      .footer-main { flex-direction: column; align-items: flex-start; gap: 24px; }
+      .footer-col--right { align-items: flex-start; justify-content: flex-start; }
+      .footer-nav { align-items: flex-start; }
     }
 
     /* ─── Responsive ─── */
     @media (max-width: 600px) {
       .ghat-overlay { left: 16px; right: 16px; width: auto; bottom: 40px; padding: 22px; }
-      #page-nav { top: 20px; right: 16px; gap: 8px; font-size: 10px; padding: 6px 14px; }
+      #page-nav { top: 20px; left: 16px; gap: 8px; font-size: 10px; padding: 6px 14px; }
+      #site-logo { top: 20px; right: 16px; height: 26px; }
     }
   </style>
 </head>
 <body>
 
   <!-- ══════════ PAGE NAVIGATION (top right) ══════════ -->
+  <img id="site-logo" src="loading_images/5_cropped.png" alt="Banarasi Bhaukal">
+
   <nav id="page-nav" aria-label="Page navigation">
-    <img class="nav-logo" src="loading_images/5_cropped.png" alt="Banarasi Bhaukal">
-    <span class="page-nav-link active" aria-current="page">Home</span>
-    <span class="page-nav-sep">|</span>
-    <a href="explore-kashi.html" class="page-nav-link">Explore Kashi</a>
-    <span class="page-nav-sep">|</span>
-    <a href="page2.html" class="page-nav-link">Manikarnika</a>
-    <span class="page-nav-sep">|</span>
-    <a href="patra.html" class="page-nav-link">Patra</a>
-    <span class="page-nav-sep">|</span>
-    <a href="about.html" class="page-nav-link">About</a>
-    <span class="page-nav-sep">|</span>
-    <a href="bio.html" class="page-nav-link">Bio</a>
+    <button id="nav-toggle" class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="page-nav-links">
+      <a href="page2.html" class="page-nav-link">Home</a>
+      <span class="page-nav-sep">|</span>
+      <a href="explore-kashi.html" class="page-nav-link">Explore Kashi</a>
+      <span class="page-nav-sep">|</span>
+      <span class="page-nav-link active" aria-current="page">Explore Ghats</span>
+      <span class="page-nav-sep">|</span>
+      <a href="patra.html" class="page-nav-link">Patra</a>
+      <span class="page-nav-sep">|</span>
+      <a href="about.html" class="page-nav-link">About</a>
+    </div>
   </nav>
 
   <!-- ══════════ LOADER ══════════ -->
@@ -532,19 +613,21 @@
 
   <!-- ══════════ FOOTER ══════════ -->
   <footer id="site-footer">
-    <div class="footer-col--left">
-      <p class="footer-copy">© 2026 Kashi — The Eternal City. All rights reserved.</p>
-      <p class="footer-credit">by Twashta Labs</p>
-    </div>
-    <div class="footer-col--right">
-      <nav class="footer-nav" aria-label="Footer navigation">
-        <a href="explore-kashi.html">Explore Kashi</a>
-        <a href="page2.html">Manikarnika</a>
-        <a href="patra.html">Patra</a>
-        <a href="about.html">About</a>
-        <a href="bio.html">Bio</a>
-      </nav>
-      <img class="footer-logo" src="loading_images/5_cropped.png" alt="Banarasi Bhaukal logo">
+    <p class="foot-crafted">Crafted at Twashta Labs</p>
+    <div class="footer-main">
+      <div class="footer-col--left">
+        <p class="footer-copy">© 2026 Banarasi Bhaukal. All rights reserved.</p>
+      </div>
+      <div class="footer-col--right">
+        <nav class="footer-nav" aria-label="Footer navigation">
+          <a href="page2.html">Home</a>
+          <a href="explore-kashi.html">Explore Kashi</a>
+          <a href="index.html">Explore Ghats</a>
+          <a href="patra.html">Patra</a>
+          <a href="about.html">About</a>
+        </nav>
+        <img class="footer-logo" src="loading_images/5_cropped.png" alt="Banarasi Bhaukal logo">
+      </div>
     </div>
   </footer>
 
@@ -858,5 +941,8 @@
   ════════════════════════════════════════════════════════ */
   probeThenQuickStart();
   </script>
+
+  <!-- ── Shared mobile nav toggle (hamburger) ───────────────────────────── -->
+  <script src="js/nav.js"></script>
 </body>
 </html>

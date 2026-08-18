@@ -23,6 +23,7 @@ const ARTIFACT_DEFS = [
     icon: '🍃',
     category: 'Spiritual Layer',
     path: 'assets/bel_patta.glb',
+    patraLink: 'patra.html#fig-bel-patra',
     story:
       'The sacred three-leafed bael (Aegle marmelos) is the most beloved ' +
       'offering to Lord Shiva. Kashi\'s faithful carry garlands of bel leaves ' +
@@ -56,6 +57,7 @@ const ARTIFACT_DEFS = [
     icon: '🥁',
     category: 'Cultural Knowledge',
     path: 'assets/damroo.glb',
+    patraLink: 'patra.html#fig-damroo',
     story:
       'Shiva\'s hourglass drum whose first beat split cosmic silence into the ' +
       'fourteen foundational Sanskrit syllables — language itself born from rhythm, ' +
@@ -72,6 +74,7 @@ const ARTIFACT_DEFS = [
     icon: '🪔',
     category: 'Cultural Knowledge',
     path: 'assets/diya.glb',
+    patraLink: 'patra.html#fig-diya',
     story:
       'Each evening at Dashaswamedh Ghat, hundreds of earthen diyas float upon ' +
       'the Ganga in the grand Aarti — each flame a prayer carried by water, ' +
@@ -305,6 +308,31 @@ class KashiScene {
     fill.position.set(0, -2, 2);
     this.scene.add(fill);
 
+    // ── 360° coverage ── the model can now be freely orbited (drag), so
+    // it needs genuine light from every horizontal direction, not just
+    // front/back-ish accents. Adds true back, left, and right sources on
+    // top of the front/rim/fill set above, plus a top-down and bottom-up
+    // pair so no face of the temple goes dark at any orbit angle.
+    const back = new THREE.DirectionalLight(0xfff2df, 1.5);
+    back.position.set(0, 1.6, -6.5);
+    this.scene.add(back);
+
+    const left = new THREE.DirectionalLight(0xffffff, 1.1);
+    left.position.set(-6, 1.5, 0);
+    this.scene.add(left);
+
+    const right = new THREE.DirectionalLight(0xffffff, 1.1);
+    right.position.set(6, 1.5, 0);
+    this.scene.add(right);
+
+    const top = new THREE.DirectionalLight(0xffffff, 0.7);
+    top.position.set(0, 7, 0);
+    this.scene.add(top);
+
+    const bottomUp = new THREE.DirectionalLight(0xffe9bf, 0.4);
+    bottomUp.position.set(0, -5, 0);
+    this.scene.add(bottomUp);
+
     // Golden point light for aura effect (off until temple lands) —
     // kept as an intentional accent moment, not baseline lighting
     this.auraLight = new THREE.PointLight(GOLD, 0, 12);
@@ -333,11 +361,25 @@ class KashiScene {
     this.canvas.addEventListener('click', e => {
       // A drag that just ended shouldn't also register as an artifact click.
       if (this._dragMoved) { this._dragMoved = false; return; }
+
+      // Clicking anywhere on the scene while an artifact panel is open
+      // closes it and returns to the orbital view — "clicking out" of the
+      // open window brings the user back to the main explore-kashi view.
+      if (this._focused) { this._closeModal(); return; }
+
       updatePointer(e.clientX, e.clientY);
       if (this.isReady) this._handleClick();
     });
 
     this.canvas.addEventListener('touchend', e => {
+      // A touch-drag that just orbited the camera shouldn't also register
+      // as an artifact tap.
+      if (this._dragMoved) { this._dragMoved = false; return; }
+
+      // Tapping outside the open artifact panel closes it, same as the
+      // mouse click-outside behaviour.
+      if (this._focused) { this._closeModal(); e.preventDefault(); return; }
+
       const t = e.changedTouches[0];
       updatePointer(t.clientX, t.clientY);
       if (this.isReady) this._handleClick();
@@ -363,42 +405,58 @@ class KashiScene {
     this._setupOrbitControls();
   }
 
-  // ── Drag-to-orbit camera (mouse only) ───────────────────────────────────
-  // The temple never moves — only the camera swings around it on a sphere,
-  // so users can drag to rotate the model, including down to a top view,
-  // while its place in the scene stays fixed.
+  // ── Drag-to-orbit camera (mouse + touch) ─────────────────────────────────
+  // The temple never moves — only the camera swings around it on a circle,
+  // so users can drag (or, on phone, touch-drag) to spin the model. Rotation
+  // is horizontal-only (single axis, around Y) — the earlier vertical tilt
+  // has been removed, so the model only ever turns on its axis, and only
+  // while the cursor/finger is actively interacting.
   _setupOrbitControls() {
     const ORBIT_SPEED = 0.006;
-    // How close to straight up/down the camera may swing.
-    const PHI_MIN = 0.08;                 // near top-down view
-    const PHI_MAX = Math.PI - 0.35;       // stop just short of straight underneath
+    // phi is locked at its initial value — no vertical tilt.
+    const lockedPhi = this._orbit.phi;
 
-    this.canvas.addEventListener('mousedown', e => {
+    const startDrag = (x, y) => {
       this._dragging  = true;
       this._dragMoved = false;
-      this._lastPtr.x = e.clientX;
-      this._lastPtr.y = e.clientY;
-    });
-
-    window.addEventListener('mousemove', e => {
+      this._lastPtr.x = x;
+      this._lastPtr.y = y;
+    };
+    const moveDrag = (x, y) => {
       if (!this._dragging) return;
-      const dx = e.clientX - this._lastPtr.x;
-      const dy = e.clientY - this._lastPtr.y;
+      const dx = x - this._lastPtr.x;
+      const dy = y - this._lastPtr.y;
       if (Math.abs(dx) > 2 || Math.abs(dy) > 2) this._dragMoved = true;
-      this._lastPtr.x = e.clientX;
-      this._lastPtr.y = e.clientY;
+      this._lastPtr.x = x;
+      this._lastPtr.y = y;
 
+      // Horizontal-only: theta (yaw) responds to drag, phi (tilt) is fixed.
       this._orbit.targetTheta -= dx * ORBIT_SPEED;
-      this._orbit.targetPhi   -= dy * ORBIT_SPEED;
-      this._orbit.targetPhi   = THREE.MathUtils.clamp(this._orbit.targetPhi, PHI_MIN, PHI_MAX);
+      this._orbit.targetPhi   = lockedPhi;
+    };
+    const endDrag = () => { this._dragging = false; };
+
+    // Mouse
+    this.canvas.addEventListener('mousedown', e => {
+      startDrag(e.clientX, e.clientY);
+      this.canvas.style.cursor = 'grabbing';
     });
-
-    window.addEventListener('mouseup', () => { this._dragging = false; });
-    window.addEventListener('mouseleave', () => { this._dragging = false; });
-
+    window.addEventListener('mousemove', e => moveDrag(e.clientX, e.clientY));
+    window.addEventListener('mouseup', () => { endDrag(); this.canvas.style.cursor = 'grab'; });
+    window.addEventListener('mouseleave', () => { endDrag(); this.canvas.style.cursor = 'grab'; });
     this.canvas.style.cursor = 'grab';
-    this.canvas.addEventListener('mousedown', () => { this.canvas.style.cursor = 'grabbing'; });
-    window.addEventListener('mouseup', () => { this.canvas.style.cursor = 'grab'; });
+
+    // Touch — same horizontal-only orbit, driven by finger drag.
+    this.canvas.addEventListener('touchstart', e => {
+      if (e.touches.length !== 1) return;
+      startDrag(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: true });
+    this.canvas.addEventListener('touchmove', e => {
+      if (e.touches.length !== 1 || !this._dragging) return;
+      moveDrag(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: true });
+    this.canvas.addEventListener('touchend',   endDrag, { passive: true });
+    this.canvas.addEventListener('touchcancel', endDrag, { passive: true });
   }
 
   // Recompute camera position from spherical coords each frame, with a
@@ -446,8 +504,10 @@ class KashiScene {
     this._setupCarouselArrows();
 
     this.isReady = true;
-    this._hint('Tap ← → to explore · touch the glowing object to learn more');
-    setTimeout(() => this._hint(''), 5500);
+    // Persistent instruction — stays up until the visitor actually clicks
+    // something, rather than fading on a timer, so the "how do I use this"
+    // question always has an answer on screen.
+    this._hint('✦ Click a glowing object to learn its story · ← → to browse · drag to rotate');
   }
 
   // ── Carousel arrow buttons ────────────────────────────────────────────────
@@ -475,17 +535,10 @@ class KashiScene {
       if (this.artifactMgr) this.artifactMgr.rotateCarousel('right');
     });
 
-    // Touch swipe on the canvas as shortcut
-    let _swipeX = 0;
-    this.canvas.addEventListener('touchstart', e => {
-      _swipeX = e.changedTouches[0].clientX;
-    }, { passive: true });
-    this.canvas.addEventListener('touchend', e => {
-      const dx = e.changedTouches[0].clientX - _swipeX;
-      if (Math.abs(dx) > 50 && this.artifactMgr) {
-        this.artifactMgr.rotateCarousel(dx < 0 ? 'right' : 'left');
-      }
-    }, { passive: true });
+    // Note: the old touch-swipe-to-rotate-carousel shortcut has been
+    // removed — touch now drives the drag-to-orbit camera (see
+    // _setupOrbitControls), and the two gestures conflicted on the same
+    // canvas. On phone, the prev/next arrows are the way to change artifact.
   }
 
   // ── Load temple GLB ──────────────────────────────────────────────────────
@@ -622,9 +675,13 @@ class KashiScene {
     const leafMat = new THREE.MeshStandardMaterial({
       color:             GOLD,
       emissive:          new THREE.Color(GOLD),
-      emissiveIntensity: 0.55,
-      metalness:         0.85,
-      roughness:         0.28,
+      // Emissive dominant, metalness/roughness low — the leaves need to
+      // read as an unambiguous, saturated gold under the 360° light rig
+      // rather than picking up washed-out white specular highlights from
+      // the directional lights surrounding the model.
+      emissiveIntensity: 1.35,
+      metalness:         0.22,
+      roughness:         0.48,
       transparent:       true,
       opacity:           0,
       depthWrite:        false,
@@ -668,12 +725,13 @@ class KashiScene {
         }
 
         // Fade halo in
-        gsap.to(leafMat, { opacity: 0.92, duration: 0.9, ease: 'power2.out', delay: 0.2 });
+        gsap.to(leafMat, { opacity: 0.97, duration: 0.9, ease: 'power2.out', delay: 0.2 });
 
-        // Gentle pulse on halo opacity too
+        // Gentle pulse on halo opacity too — shallower dip so the gold
+        // stays clearly visible even at the low end of the pulse.
         if (!this.PRM) {
           gsap.to(leafMat, {
-            opacity:  0.55,
+            opacity:  0.72,
             duration: 2.5,
             ease:     'sine.inOut',
             yoyo:     true,
@@ -726,6 +784,10 @@ class KashiScene {
     this._focused = hitItem;
     this.isReady  = false; // pause hover detection during focus
 
+    // The instruction hint has done its job once someone actually clicks
+    // an object — dismiss it for good.
+    this._hint('');
+
     const gsap = window.gsap;
 
     // ─ 1. Populate content panel ───────────────────────────────────────────────
@@ -744,6 +806,17 @@ class KashiScene {
       </article>
     `).join('');
 
+    // ─ 1b. "See it in Patra" deep link, when this artifact has one ─────────
+    const patraLinkEl = document.getElementById('panel-patra-link');
+    if (patraLinkEl) {
+      if (data.patraLink) {
+        patraLinkEl.href = data.patraLink;
+        patraLinkEl.style.display = '';
+      } else {
+        patraLinkEl.style.display = 'none';
+      }
+    }
+
     // ─ 2. Show panels ─────────────────────────────────────────────────────
     const contentPanel = document.getElementById('content-panel');
     const objectPanel  = document.getElementById('object-panel');
@@ -751,7 +824,12 @@ class KashiScene {
     objectPanel.classList.add('open');
 
     // ─ 3. Hide carousel arrows while focused ───────────────────────────────
+    // Also disable their pointer-events (opacity 0 alone leaves them
+    // clickable) so they can't invisibly rotate the carousel underneath an
+    // open panel — a stray click on their old screen position while the
+    // detail panel is open would otherwise change the front item.
     gsap.to(['#carousel-prev', '#carousel-next'], { opacity: 0, duration: 0.25 });
+    document.querySelectorAll('.carousel-arrow').forEach(el => { el.style.pointerEvents = 'none'; });
 
     // ─ 4. Dim other artifacts + temple (PRD §11) ───────────────────────────
     this.artifactMgr.items.forEach(item => {
@@ -807,6 +885,7 @@ class KashiScene {
 
     // Restore carousel arrows
     gsap.to(['#carousel-prev', '#carousel-next'], { opacity: 1, duration: 0.4, delay: 0.5 });
+    document.querySelectorAll('.carousel-arrow').forEach(el => { el.style.pointerEvents = 'all'; });
 
     // Restore artifact position + scale
     if (this._focusedOrigPos) {

@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Making Software — A reference manual for people who design and build software</title>
+<meta name="description" content="Making Software is a reference manual for people who design and build software. Written and illustrated by Dan Hollick." />
+
+<!-- Fonts: Space Mono approximates Departure Mono; Source Serif 4 for editorial body -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet" />
+
+<style>
+/* ══════════════════════════════════════════════════════════════
+   1. DESIGN TOKENS
+════════════════════════════════════════════════════════════════ */
+:root {
+  --background: #E8ECF5;
+  --surface:    #FFFFFF;
+
+  --ink:         #171717;
+  --muted:       #777777;
+  --muted-light: #848484;
+
+  --blue:        #324CC3;
+  --blue-light:  #93A8F4;
+  --blue-soft:   #EAEBF8;
+  --blue-bright: #6C94FC;
+
+  --rule: rgba(23, 23, 23, 0.14);
+
+  --grid-size: 16px;
+
+  --font-mono:  "Space Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --font-serif: "Source Serif 4", ui-serif, Georgia, serif;
+
+  --page-width: 1600px;
+  --page-padding: clamp(20px, 5vw, 96px);
+
+  --sp-1: 8px;
+  --sp-2: 16px;
+  --sp-3: 24px;
+  --sp-4: 32px;
+  --sp-5: 48px;
+  --sp-6: 64px;
+  --sp-7: 96px;
+  --sp-8: 128px;
+  --sp-9: 192px;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   2. RESET & BASE
+════════════════════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--ink);
+  font-family: var(--font-serif);
+  font-size: 17px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+img, svg { display: block; max-width: 100%; }
+a { color: inherit; }
+h1, h2, h3, h4 { font-weight: 400; margin: 0; }
+p { margin: 0; }
+ul { list-style: none; margin: 0; padding: 0; }
+button, input { font: inherit; color: inherit; background: none; border: none; }
+
+.mono { font-family: var(--font-mono); text-transform: uppercase; }
+
+.wrap {
+  max-width: var(--page-width);
+  margin: 0 auto;
+  padding-left: var(--page-padding);
+  padding-right: var(--page-padding);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   3. GRAPH-PAPER GRID TEXTURE
+════════════════════════════════════════════════════════════════ */
+.grid-surface {
+  background-image:
+    linear-gradient(rgba(50, 76, 195, .07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(50, 76, 195, .07) 1px, transparent 1px);
+  background-size: var(--grid-size) var(--grid-size);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   4. HAND-DRAWN WAVY BLUE UNDERLINE
+════════════════════════════════════════════════════════════════ */
+.hl {
+  position: relative;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: color .25s ease-out;
+}
+.hl::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 100%; bottom: -3px;
+  height: 7px;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='26' height='7'><path d='M0,4 Q6.5,0.5 13,4 T26,4' stroke='%23324CC3' stroke-width='1.6' fill='none' stroke-linecap='round'/></svg>");
+  background-repeat: repeat-x;
+  background-size: 26px 7px;
+  opacity: 0;
+  transition: right .45s ease-out, opacity .2s ease-out;
+}
+.hl:hover, .hl:focus-visible { color: var(--blue); }
+.hl:hover::after, .hl:focus-visible::after { right: 0; opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .hl::after { transition: none; } }
+
+/* Dotted underline for mailing list link */
+.link-dotted {
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.link-dotted:hover { color: var(--blue); }
+
+/* ══════════════════════════════════════════════════════════════
+   5. STIPPLE SEPARATOR ROW
+════════════════════════════════════════════════════════════════ */
+.stipple {
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  padding: 0;
+  line-height: 1;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .05em;
+  color: rgba(50, 76, 195, 0.22);
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+.stipple-chars {
+  flex: 1;
+  overflow: hidden;
+  height: 1.1em;
+  display: flex;
+  align-items: center;
+}
+.stipple-title {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .2em;
+  color: var(--muted-light);
+  text-transform: uppercase;
+  white-space: nowrap;
+  padding: 0 1em;
+  flex-shrink: 0;
+}
+/* Generates repeating ░ without JS by repeating a long string */
+.stipple-chars::before {
+  content: "░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░";
+  overflow: hidden;
+  display: block;
+  width: 100%;
+}
+.stipple.with-title {
+  padding: 3px 0;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   6. PAGE LOADER — letter materialise animation
+════════════════════════════════════════════════════════════════ */
+#loader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: var(--background);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-3);
+  transition: opacity .5s ease .1s;
+}
+#loader.hidden { opacity: 0; pointer-events: none; }
+
+.loader-title {
+  display: flex;
+  gap: 0;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: clamp(24px, 5vw, 60px);
+  color: var(--blue);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.loader-title .lt {
+  display: inline-block;
+  opacity: 0;
+  filter: blur(4px);
+  animation: letter-appear .5s ease-out forwards;
+}
+.loader-stipple {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: .12em;
+  color: rgba(50, 76, 195, 0.3);
+  white-space: nowrap;
+  overflow: hidden;
+  max-width: 90vw;
+}
+@keyframes letter-appear {
+  0%   { opacity: 0; filter: blur(4px); transform: translateY(4px); }
+  60%  { opacity: .7; }
+  100% { opacity: 1; filter: blur(0); transform: translateY(0); }
+}
+
+#app {
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity .7s ease, transform .7s ease;
+}
+#app.revealed { opacity: 1; transform: translateY(0); }
+
+/* ══════════════════════════════════════════════════════════════
+   7. HEADER
+════════════════════════════════════════════════════════════════ */
+header.site {
+  padding: clamp(20px, 2.5vw, 36px) 0 clamp(16px, 2vw, 28px);
+}
+header.site .wrap {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: flex-start;
+  gap: var(--sp-5);
+}
+.site-title {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: clamp(32px, 5.5vw, 72px);
+  color: var(--blue);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  line-height: 1;
+  /* Each letter is a span for the load animation but also just works as text */
+}
+.site-descriptor {
+  text-align: right;
+  font-family: var(--font-serif);
+  font-size: clamp(13px, 1.1vw, 15px);
+  line-height: 1.55;
+  color: var(--ink);
+  padding-top: .4em;
+}
+.site-descriptor strong {
+  display: block;
+  font-weight: 600;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   8. HERO — editorial two-column
+════════════════════════════════════════════════════════════════ */
+.hero {
+  padding: var(--sp-5) 0 var(--sp-6);
+}
+.hero .wrap {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  gap: 0;
+  align-items: stretch;
+  position: relative;
+}
+
+/* LEFT — editorial text column */
+.hero-editorial {
+  padding-right: clamp(24px, 3vw, 56px);
+  position: relative;
+  padding-left: 28px; /* room for FIG label */
+}
+.hero-editorial-inner {
+  padding-top: var(--sp-3);
+}
+
+/* Drop capital */
+.drop-cap::first-letter {
+  float: left;
+  font-size: 4.2em;
+  line-height: .78;
+  padding-right: .06em;
+  padding-top: .06em;
+  font-weight: 400;
+  color: var(--ink);
+  font-family: var(--font-serif);
+}
+
+.hero-para {
+  font-family: var(--font-serif);
+  font-size: clamp(14px, 1.1vw, 16px);
+  line-height: 1.72;
+  color: var(--ink);
+  text-align: justify;
+  hyphens: auto;
+  margin-bottom: var(--sp-3);
+}
+
+/* Small inline diagram */
+.inline-diagram {
+  position: relative;
+  margin: var(--sp-3) 0;
+  padding-left: 28px;
+}
+.inline-diagram svg {
+  width: 100%;
+  max-width: 260px;
+  height: auto;
+}
+
+/* Rotated FIG label on left margin */
+.fig-label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--blue);
+  opacity: .7;
+  user-select: none;
+}
+
+/* RIGHT — large floppy disk diagram */
+.hero-diagram-col {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+}
+.hero-main-diagram {
+  flex: 1;
+  position: relative;
+  padding: var(--sp-4);
+}
+.hero-main-diagram svg {
+  width: 100%;
+  height: auto;
+  min-height: 380px;
+}
+/* Rotated right-edge label */
+.diagram-subject-label {
+  position: absolute;
+  right: -2px;
+  top: 50%;
+  transform: translateY(-50%);
+  writing-mode: vertical-rl;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  opacity: .6;
+  user-select: none;
+}
+.hero-diagram-col .fig-label {
+  left: 4px;
+  top: 50%;
+  transform: translateY(-50%) rotate(180deg);
+  writing-mode: vertical-rl;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   9. EDITORIAL CONTENT BLOCK (Bézier / about)
+════════════════════════════════════════════════════════════════ */
+.editorial {
+  padding: var(--sp-7) 0;
+}
+.editorial .wrap {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  gap: 0;
+  align-items: center;
+}
+
+/* Bézier diagram side */
+.ed-diagram {
+  position: relative;
+  padding: var(--sp-5);
+  padding-left: 40px;
+}
+.ed-diagram svg {
+  width: 100%;
+  max-width: 420px;
+  height: auto;
+}
+.ed-diagram .fig-label {
+  top: var(--sp-3);
+}
+
+/* Text side */
+.ed-text {
+  padding-left: clamp(24px, 4vw, 72px);
+  padding-right: clamp(20px, 3vw, 56px);
+}
+.ed-text .stipple-meta {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: .14em;
+  color: rgba(50, 76, 195, 0.28);
+  margin-bottom: var(--sp-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
+}
+.ed-section-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: .14em;
+  color: rgba(50, 76, 195, 0.3);
+  text-transform: uppercase;
+  margin-bottom: var(--sp-4);
+  overflow: hidden;
+  white-space: nowrap;
+}
+.ed-lead {
+  font-family: var(--font-serif);
+  font-size: clamp(15px, 1.15vw, 17px);
+  line-height: 1.7;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: var(--sp-4);
+}
+.ed-para {
+  font-family: var(--font-serif);
+  font-size: clamp(14px, 1.05vw, 15px);
+  line-height: 1.78;
+  color: var(--ink);
+  text-align: justify;
+  hyphens: auto;
+  margin-bottom: var(--sp-3);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   10. EARLY ACCESS CTA
+════════════════════════════════════════════════════════════════ */
+.early-access {
+  padding: var(--sp-7) 0;
+}
+.early-access .wrap {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: 0;
+  align-items: center;
+}
+
+/* CRT diagram side */
+.ea-diagram {
+  position: relative;
+  padding: var(--sp-5);
+  padding-left: 40px;
+}
+.ea-diagram svg {
+  width: 100%;
+  max-width: 520px;
+  height: auto;
+}
+.ea-diagram .fig-label { top: var(--sp-3); }
+.ea-year-label {
+  position: absolute;
+  right: 14px;
+  bottom: 40px;
+  writing-mode: vertical-rl;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--muted-light);
+  opacity: .5;
+  letter-spacing: .12em;
+}
+.ea-subject-label {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  writing-mode: vertical-rl;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  opacity: .55;
+}
+
+/* Text side */
+.ea-text {
+  padding-left: clamp(32px, 4vw, 72px);
+  padding-right: clamp(20px, 3vw, 48px);
+}
+.ea-heading {
+  font-family: var(--font-serif);
+  font-size: clamp(1.2rem, 1.8vw, 1.5rem);
+  font-weight: 600;
+  margin-bottom: var(--sp-2);
+}
+.ea-body {
+  font-family: var(--font-serif);
+  font-size: clamp(14px, 1.05vw, 15px);
+  line-height: 1.72;
+  color: var(--ink);
+  margin-bottom: var(--sp-4);
+}
+.btn-access {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 12px 20px;
+  border: 1px solid var(--ink);
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  transition: color .2s ease, border-color .2s ease, background .2s ease;
+  margin-bottom: var(--sp-3);
+  white-space: nowrap;
+}
+.btn-access:hover {
+  color: var(--blue);
+  border-color: var(--blue);
+  background: var(--blue-soft);
+}
+.ea-mailing {
+  font-family: var(--font-serif);
+  font-size: 15px;
+  color: var(--ink);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   11. TABLE OF CONTENTS
+════════════════════════════════════════════════════════════════ */
+.toc-section-outer {
+  padding: var(--sp-7) 0 var(--sp-8);
+}
+
+/* Header row */
+.toc-header {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-6);
+}
+.toc-version {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: .14em;
+  color: var(--muted-light);
+  text-transform: uppercase;
+  white-space: nowrap;
+  margin-bottom: 4px;
+}
+.toc-title-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  flex: 1;
+}
+.toc-heading-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  width: 100%;
+}
+.toc-heading {
+  font-family: var(--font-serif);
+  font-size: clamp(1.4rem, 2.2vw, 1.9rem);
+  font-weight: 400;
+  white-space: nowrap;
+}
+.toc-heading-rule {
+  flex: 1;
+  height: 1px;
+  background: var(--ink);
+  opacity: .18;
+}
+.toc-toggle {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+  cursor: pointer;
+  display: flex;
+  gap: .4em;
+  align-items: center;
+}
+.toc-toggle .toc-words-btn {
+  color: var(--blue);
+  cursor: pointer;
+  background: none;
+  border: none;
+  font: inherit;
+  letter-spacing: inherit;
+  padding: 0;
+}
+.toc-toggle .toc-words-btn:hover { text-decoration: underline; }
+
+/* Two-column grid */
+.toc-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-5) var(--sp-7);
+  align-items: start;
+}
+
+.toc-group {}
+.toc-group-title {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ink);
+  margin-bottom: var(--sp-3);
+  padding-bottom: var(--sp-1);
+}
+.toc-chapters { display: flex; flex-direction: column; gap: 0; }
+.toc-chapter-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0;
+  padding: 7px 0;
+  text-decoration: none;
+  color: var(--ink);
+  transition: color .18s ease;
+  position: relative;
+  cursor: pointer;
+}
+.toc-chapter-row:hover { color: var(--blue); }
+.toc-chapter-bullet {
+  font-family: var(--font-serif);
+  font-size: 15px;
+  margin-right: 6px;
+  flex-shrink: 0;
+}
+.toc-chapter-name {
+  font-family: var(--font-serif);
+  font-size: 15px;
+  flex-shrink: 0;
+}
+/* Dotted leader line */
+.toc-leader {
+  flex: 1;
+  border-bottom: 1px dotted rgba(23, 23, 23, .3);
+  margin: 0 6px;
+  position: relative;
+  top: -3px;
+  min-width: 20px;
+}
+.toc-chapter-row.no-count .toc-leader {
+  border-bottom-color: rgba(23, 23, 23, .1);
+}
+.toc-word-count {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted-light);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   12. FOOTER
+════════════════════════════════════════════════════════════════ */
+footer.site {
+  padding: var(--sp-6) 0 var(--sp-5);
+  border-top: 1px solid var(--rule);
+}
+footer.site .wrap {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--sp-5);
+}
+.foot-title {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: .12em;
+  color: var(--blue);
+  text-transform: uppercase;
+  margin-bottom: var(--sp-1);
+}
+.foot-byline {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: .04em;
+  color: var(--muted);
+  line-height: 1.7;
+  max-width: 280px;
+  text-transform: none;
+}
+footer.site nav ul {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+footer.site nav a {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--muted);
+  transition: color .18s ease;
+}
+footer.site nav a:hover { color: var(--blue); }
+.foot-bottom {
+  width: 100%;
+  margin-top: var(--sp-4);
+  padding-top: var(--sp-3);
+  border-top: 1px solid var(--rule);
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: .06em;
+  color: var(--muted-light);
+  text-transform: uppercase;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   13. SCROLL REVEAL
+════════════════════════════════════════════════════════════════ */
+.reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity .6s ease, transform .6s ease;
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   14. RESPONSIVE
+════════════════════════════════════════════════════════════════ */
+@media (max-width: 1100px) {
+  .hero .wrap,
+  .editorial .wrap,
+  .early-access .wrap {
+    grid-template-columns: 1fr;
+  }
+  .ed-text { padding-left: 0; padding-right: 0; }
+  .ea-text { padding-left: 0; padding-right: 0; }
+  .toc-grid { grid-template-columns: 1fr; gap: var(--sp-5); }
+}
+
+@media (max-width: 767px) {
+  body { font-size: 16px; }
+  .site-title { font-size: clamp(24px, 10vw, 44px); }
+  header.site .wrap { grid-template-columns: 1fr; gap: var(--sp-2); }
+  .site-descriptor { text-align: left; }
+  .hero-editorial { padding-right: 0; }
+  .hero-main-diagram { display: none; } /* hide on mobile to keep readable */
+  .ed-diagram svg { max-width: 100%; }
+  .ea-diagram svg { max-width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════ LOADER ══════════════════════════════════ -->
+<div id="loader" role="progressbar" aria-label="Loading Making Software">
+  <div class="loader-title" id="loader-title" aria-hidden="true">
+    <!-- Letters injected by JS for stagger animation -->
+  </div>
+  <div class="loader-stipple" aria-hidden="true">░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░</div>
+</div>
+
+<div id="app">
+
+  <!-- ══════════════════════════════════ HEADER ══════════════════════════════════ -->
+  <header class="site">
+    <div class="wrap">
+      <h1 class="site-title" id="site-title">MAKING SOFTWARE</h1>
+      <div class="site-descriptor">
+        A reference manual for people who design and build software.<br>
+        <strong>Written and illustrated by Dan Hollick.</strong>
+      </div>
+    </div>
+  </header>
+
+  <!-- Stipple separator below header -->
+  <div class="stipple" aria-hidden="true">
+    <div class="stipple-chars"></div>
+  </div>
+
+  <!-- ══════════════════════════════════ HERO ══════════════════════════════════ -->
+  <section class="hero" id="about">
+    <div class="wrap">
+
+      <!-- LEFT — editorial body text with inline diagrams -->
+      <div class="hero-editorial reveal">
+        <span class="fig-label">FIG.001</span>
+        <div class="hero-editorial-inner">
+
+          <p class="hero-para drop-cap">Have you ever wondered how a touch screen knows you are touching it? Well, it has these layers of transparent metal electrodes embedded in the display. When your finger gets close to the screen it causes a disturbance in the magnetic field that the electrodes sense.</p>
+
+          <!-- FIG.002 — touchscreen electrode stack -->
+          <div class="inline-diagram" style="position:relative;">
+            <span class="fig-label" style="position:absolute;left:0;top:0;">FIG.002</span>
+            <div style="padding-left:28px;">
+              <svg viewBox="0 0 260 200" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Isometric diagram of touchscreen electrode layers">
+                <!-- Glass layer -->
+                <polygon points="20,48 160,48 220,80 80,80" fill="#EAEBF8" stroke="#324CC3" stroke-width="1"/>
+                <text x="20" y="41" font-family="'Space Mono',monospace" font-size="8" fill="#324CC3" text-transform="uppercase">GLASS</text>
+                <!-- Electrode X layer -->
+                <polygon points="20,82 160,82 220,114 80,114" fill="#fff" stroke="#324CC3" stroke-width="1" opacity=".9"/>
+                <line x1="38" y1="87" x2="88" y2="109" stroke="#93A8F4" stroke-width=".8"/>
+                <line x1="62" y1="85" x2="112" y2="107" stroke="#93A8F4" stroke-width=".8"/>
+                <line x1="86" y1="83" x2="136" y2="105" stroke="#93A8F4" stroke-width=".8"/>
+                <text x="20" y="76" font-family="'Space Mono',monospace" font-size="8" fill="#324CC3">ELECTRODE X</text>
+                <!-- Electrode Y layer -->
+                <polygon points="20,118 160,118 220,150 80,150" fill="#fff" stroke="#324CC3" stroke-width="1" opacity=".9"/>
+                <line x1="44" y1="123" x2="44" y2="143" stroke="#93A8F4" stroke-width=".8"/>
+                <line x1="82" y1="121" x2="82" y2="141" stroke="#93A8F4" stroke-width=".8"/>
+                <line x1="120" y1="119" x2="120" y2="139" stroke="#93A8F4" stroke-width=".8"/>
+                <text x="20" y="112" font-family="'Space Mono',monospace" font-size="8" fill="#324CC3">ELECTRODE Y</text>
+                <!-- Display base -->
+                <polygon points="20,154 160,154 220,186 80,186" fill="rgba(23,23,23,.05)" stroke="#324CC3" stroke-width="1"/>
+                <text x="20" y="196" font-family="'Space Mono',monospace" font-size="8" fill="#324CC3">DISPLAY</text>
+                <!-- Touch point -->
+                <circle cx="130" cy="64" r="3" fill="#324CC3"/>
+                <line x1="130" y1="64" x2="130" y2="34" stroke="#324CC3" stroke-width=".8"/>
+                <text x="136" y="31" font-family="'Space Mono',monospace" font-size="8" fill="#171717">TOUCH</text>
+              </svg>
+            </div>
+          </div>
+
+          <p class="hero-para">Because the electrodes are laid out on a grid, they can report back the x and y co-ordinates of the disturbance to the operating system. Pretty neat.</p>
+
+          <p class="hero-para">Or maybe you've wondered why we call it a Gaussian blur? When we blur an image, we look at all the neighbouring pixels and multiply them by a matrix of weights called a kernel.</p>
+
+          <!-- FIG.003 — Gaussian / bell curve -->
+          <div class="inline-diagram" style="position:relative;">
+            <span class="fig-label" style="position:absolute;left:0;top:0;">FIG.003</span>
+            <div style="padding-left:28px;">
+              <svg viewBox="0 0 240 120" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Gaussian bell curve diagram">
+                <!-- Grid hint -->
+                <line x1="10" y1="105" x2="230" y2="105" stroke="#324CC3" stroke-width=".6" opacity=".3"/>
+                <line x1="120" y1="10" x2="120" y2="108" stroke="#324CC3" stroke-width=".6" stroke-dasharray="3 3" opacity=".3"/>
+                <!-- Bell curve -->
+                <path d="M10,104 C30,104 60,102 80,85 C95,72 105,40 120,18 C135,40 145,72 160,85 C180,102 210,104 230,104" stroke="#324CC3" stroke-width="2" fill="none"/>
+                <!-- Fill under curve -->
+                <path d="M10,104 C30,104 60,102 80,85 C95,72 105,40 120,18 C135,40 145,72 160,85 C180,102 210,104 230,104 L230,105 L10,105 Z" fill="rgba(50,76,195,.08)"/>
+                <!-- μ label -->
+                <text x="114" y="115" font-family="'Space Mono',monospace" font-size="8" fill="#324CC3">μ</text>
+              </svg>
+            </div>
+          </div>
+
+          <p class="hero-para">They control the points on a bezier curve which is a cool piece of math we use to draw curves in vector graphics, like fonts and SVGs.</p>
+
+        </div>
+      </div>
+
+      <!-- RIGHT — large floppy disk exploded diagram -->
+      <div class="hero-diagram-col reveal">
+        <div class="hero-main-diagram grid-surface">
+          <span class="fig-label" style="position:absolute;left:6px;top:50%;transform:translateY(-50%) rotate(180deg);writing-mode:vertical-rl;">FIG.001</span>
+          <svg viewBox="0 0 560 700" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Exploded isometric diagram of a 3.5 inch floppy disk">
+
+            <!-- Vertical dashed construction lines -->
+            <line x1="280" y1="80" x2="280" y2="660" stroke="#324CC3" stroke-width=".7" stroke-dasharray="3 4" opacity=".25"/>
+            <line x1="180" y1="100" x2="180" y2="660" stroke="#324CC3" stroke-width=".7" stroke-dasharray="3 4" opacity=".15"/>
+
+            <!-- ── TOP SHELL ── isometric rectangle top face -->
+            <polygon points="100,120 380,80 480,130 200,170" fill="#E8ECF5" stroke="#324CC3" stroke-width="1.3"/>
+            <!-- Shell sides -->
+            <polygon points="100,120 100,160 200,210 200,170" fill="#D4DAEE" stroke="#324CC3" stroke-width="1.3"/>
+            <polygon points="380,80 480,130 480,170 380,120" fill="#D4DAEE" stroke="#324CC3" stroke-width="1.3"/>
+            <polygon points="100,160 380,120 480,170 200,210" fill="#C8D0E8" stroke="#324CC3" stroke-width="1.3"/>
+            <!-- HD Notch on top-right corner -->
+            <rect x="440" y="82" width="24" height="20" rx="2" fill="#E8ECF5" stroke="#324CC3" stroke-width="1"/>
+            <!-- Leader: HD NOTCH -->
+            <line x1="455" y1="82" x2="510" y2="50" stroke="#324CC3" stroke-width=".8"/>
+            <text x="514" y="47" font-family="'Space Mono',monospace" font-size="10" fill="#324CC3" text-anchor="start">HD NOTCH</text>
+            <!-- Leader: TOP SHELL -->
+            <line x1="480" y1="130" x2="520" y2="130" stroke="#324CC3" stroke-width=".8"/>
+            <text x="524" y="133" font-family="'Space Mono',monospace" font-size="10" fill="#324CC3">TOP SHELL</text>
+
+            <!-- ── DUST LINER 1 ── (oval disk, separated) -->
+            <ellipse cx="290" cy="300" rx="160" ry="60" fill="#E0E4F0" stroke="#324CC3" stroke-width="1.1" opacity=".7"/>
+            <ellipse cx="290" cy="295" rx="155" ry="54" fill="none" stroke="#93A8F4" stroke-width=".7" stroke-dasharray="4 4" opacity=".5"/>
+            <!-- Leader: DUST LINER -->
+            <line x1="134" y1="300" x2="90" y2="300" stroke="#324CC3" stroke-width=".8"/>
+            <text x="20" y="303" font-family="'Space Mono',monospace" font-size="10" fill="#324CC3">DUST LINER</text>
+
+            <!-- ── MAGNETIC DISK ── filled blue oval -->
+            <ellipse cx="290" cy="420" rx="148" ry="56" fill="#7B8EC8" stroke="#324CC3" stroke-width="1.3"/>
+            <!-- Hub circle -->
+            <ellipse cx="290" cy="415" rx="32" ry="12" fill="#5A6BB0" stroke="#324CC3" stroke-width="1.1"/>
+            <!-- Disk surface lines (recording tracks hint) -->
+            <ellipse cx="290" cy="418" rx="80" ry="30" fill="none" stroke="rgba(255,255,255,.18)" stroke-width=".6"/>
+            <ellipse cx="290" cy="418" rx="110" ry="42" fill="none" stroke="rgba(255,255,255,.12)" stroke-width=".6"/>
+            <!-- Leader: MAGNETIC DISK -->
+            <line x1="438" y1="420" x2="490" y2="400" stroke="#324CC3" stroke-width=".8"/>
+            <text x="494" y="403" font-family="'Space Mono',monospace" font-size="10" fill="#324CC3">MAGNETIC DISK</text>
+            <!-- Leader: HUB -->
+            <line x1="322" y1="415" x2="490" y2="430" stroke="#324CC3" stroke-width=".8"/>
+            <text x="494" y="433" font-family="'Space Mono',monospace" font-size="10" fill="#324CC3">HUB</text>
+
+            <!-- ── DUST LINER 2 ── (lower) -->
+            <ellipse cx="290" cy="530" rx="155" ry="58" fill="#E0E4F0" stroke="#324CC3" stroke-width="1.1" opacity=".65"/>
+            <!-- Leader: DUST LINER -->
+            <line x1="134" y1="530" x2="90" y2="530" stroke="#324CC3" stroke-width=".8"/>
+            <text x="20" y="533" font-family="'Space Mono',monospace" font-size="10" fill="#324CC3">DUST LINER</text>
+
+            <!-- ── WRITE PROTECT TAB ── bottom right corner notch -->
+            <rect x="100" y="615" width="22" height="22" rx="2" fill="#EAEBF8" stroke="#324CC3" stroke-width="1"/>
+            <!-- Leader: WRITE PROTECT TAB -->
+            <line x1="122" y1="626" x2="490" y2="626" stroke="#324CC3" stroke-width=".8"/>
+            <text x="494" y="629" font-family="'Space Mono',monospace" font-size="10" fill="#324CC3">WRITE PROTECT TAB</text>
+
+          </svg>
+          <span class="diagram-subject-label">[ 3.5" FLOPPY DISK ]</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Stipple separator with title -->
+  <div class="stipple with-title" aria-hidden="true">
+    <div class="stipple-chars"></div>
+    <span class="stipple-title">Making Software</span>
+    <div class="stipple-chars"></div>
+  </div>
+
+  <!-- ══════════════════════════════════ EDITORIAL / ABOUT ══════════════════════════════════ -->
+  <section class="editorial" id="about-section">
+    <div class="wrap">
+
+      <!-- LEFT — Bézier diagram -->
+      <div class="ed-diagram reveal" style="position:relative;">
+        <span class="fig-label">FIG.004</span>
+        <div class="grid-surface" style="padding: var(--sp-5) var(--sp-4);">
+          <svg viewBox="0 0 400 260" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Cubic Bézier curve with animated control point indicator">
+            <!-- Control point handles -->
+            <line x1="40" y1="200" x2="100" y2="50" stroke="#93A8F4" stroke-width="1" stroke-dasharray="5 4" opacity=".7"/>
+            <line x1="340" y1="160" x2="270" y2="50" stroke="#93A8F4" stroke-width="1" stroke-dasharray="5 4" opacity=".7"/>
+            <!-- Ghost curves for context -->
+            <path d="M40,200 C80,160 200,50 340,160" stroke="#93A8F4" stroke-width=".7" fill="none" opacity=".25" stroke-dasharray="4 4"/>
+            <path d="M40,200 C130,40 300,60 340,160" stroke="#93A8F4" stroke-width=".7" fill="none" opacity=".25" stroke-dasharray="4 4"/>
+            <!-- Main Bézier curve -->
+            <path d="M40,200 C100,50 270,50 340,160" stroke="#324CC3" stroke-width="2.2" fill="none"/>
+            <!-- Endpoints -->
+            <circle cx="40" cy="200" r="5" fill="#171717"/>
+            <circle cx="340" cy="160" r="5" fill="#171717"/>
+            <!-- Control points -->
+            <circle cx="100" cy="50" r="4.5" fill="none" stroke="#324CC3" stroke-width="1.5"/>
+            <circle cx="270" cy="50" r="4.5" fill="none" stroke="#324CC3" stroke-width="1.5"/>
+            <!-- t value indicator -->
+            <text x="165" y="130" font-family="'Space Mono',monospace" font-size="10" fill="#324CC3">t = 0.82</text>
+            <!-- Labels -->
+            <text x="22" y="218" font-family="'Space Mono',monospace" font-size="9" fill="#171717">P0</text>
+            <text x="344" y="156" font-family="'Space Mono',monospace" font-size="9" fill="#171717">P3</text>
+            <text x="84" y="40" font-family="'Space Mono',monospace" font-size="9" fill="#324CC3">P1</text>
+            <text x="254" y="40" font-family="'Space Mono',monospace" font-size="9" fill="#324CC3">P2</text>
+          </svg>
+        </div>
+      </div>
+
+      <!-- RIGHT — editorial text -->
+      <div class="ed-text reveal">
+        <div class="ed-section-label">░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░</div>
+        <p class="ed-lead"><strong>If you've ever wondered about any of these things or if they've sparked your curiosity, then this is for you.</strong></p>
+        <p class="ed-para">This book won't teach you how to actually make software — it's not a tutorial or a guide but rather something more interesting than that. It's a manual that explains how the things you use everyday actually work.</p>
+        <p class="ed-para">As everything around us has become more complicated our understanding of technology has diminished. It used to be that we needed to understand our tools deeply but today we understand them in a shallow, abstracted way.</p>
+        <p class="ed-para">It won't make you a better designer or programmer tomorrow — there's nothing actionable in here. But knowing how things work comes in handy when you find yourself out of your depth. Or at the very least, you can pretend to be smart in front of your friends.</p>
+        <p class="ed-para">You don't need to be technical to read this — there are a lot of pictures and diagrams to do the heavy lifting. You just need to be curious.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Stipple separator with title -->
+  <div class="stipple with-title" aria-hidden="true">
+    <div class="stipple-chars"></div>
+    <span class="stipple-title">Making Software</span>
+    <div class="stipple-chars"></div>
+  </div>
+
+  <!-- ══════════════════════════════════ EARLY ACCESS CTA ══════════════════════════════════ -->
+  <section class="early-access" id="early-access">
+    <div class="wrap">
+
+      <!-- LEFT — CRT diagram -->
+      <div class="ea-diagram reveal" style="position:relative;">
+        <span class="fig-label">FIG.006</span>
+        <div class="grid-surface" style="padding: var(--sp-5) var(--sp-4);">
+          <svg viewBox="0 0 520 360" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Technical diagram of a cathode ray tube display">
+            <!-- Electron gun body -->
+            <rect x="20" y="155" width="50" height="50" fill="#EAEBF8" stroke="#324CC3" stroke-width="1.1"/>
+            <!-- Anodes inside gun -->
+            <rect x="36" y="163" width="8" height="34" fill="#7B8EC8" stroke="#324CC3" stroke-width=".7"/>
+            <rect x="52" y="163" width="8" height="34" fill="#7B8EC8" stroke="#324CC3" stroke-width=".7"/>
+            <!-- Vacuum tube body (tapered neck) -->
+            <path d="M70,165 C80,165 100,162 130,158 L130,202 C100,198 80,195 70,195 Z" fill="#E4E8F2" stroke="#324CC3" stroke-width="1.1"/>
+            <!-- Deflecting magnets -->
+            <ellipse cx="145" cy="170" rx="6" ry="12" fill="#7B8EC8" stroke="#324CC3" stroke-width=".9"/>
+            <ellipse cx="145" cy="190" rx="6" ry="12" fill="#7B8EC8" stroke="#324CC3" stroke-width=".9"/>
+            <!-- Tube flare (widening) -->
+            <path d="M130,158 C180,145 260,118 360,100 L360,260 C260,242 180,215 130,202 Z" fill="#E8ECF5" stroke="#324CC3" stroke-width="1.2"/>
+            <!-- Phosphor screen face -->
+            <rect x="360" y="95" width="28" height="170" rx="3" fill="#7B8EC8" stroke="#324CC3" stroke-width="1.3" opacity=".8"/>
+            <!-- Thick lead glass -->
+            <rect x="390" y="92" width="14" height="176" rx="2" fill="#C8D0E8" stroke="#324CC3" stroke-width="1.1"/>
+            <!-- Electron beam path -->
+            <path d="M70,180 C120,180 200,155 360,140" stroke="#324CC3" stroke-width="1" stroke-dasharray="4 3" opacity=".7"/>
+            <!-- Light arrow -->
+            <line x1="404" y1="180" x2="450" y2="180" stroke="#324CC3" stroke-width="1.2"/>
+            <polygon points="450,176 460,180 450,184" fill="#324CC3"/>
+
+            <!-- Leader arrows -->
+            <!-- ELECTRON GUN -->
+            <line x1="45" y1="155" x2="45" y2="118" stroke="#324CC3" stroke-width=".8"/>
+            <line x1="45" y1="118" x2="80" y2="118" stroke="#324CC3" stroke-width=".8"/>
+            <text x="84" y="121" font-family="'Space Mono',monospace" font-size="9" fill="#324CC3">ELECTRON GUN</text>
+            <!-- ANODES -->
+            <line x1="56" y1="195" x2="56" y2="225" stroke="#324CC3" stroke-width=".8"/>
+            <line x1="56" y1="225" x2="90" y2="225" stroke="#324CC3" stroke-width=".8"/>
+            <text x="94" y="228" font-family="'Space Mono',monospace" font-size="9" fill="#324CC3">ANODES</text>
+            <!-- DEFLECTING MAGNETS -->
+            <line x1="145" y1="205" x2="145" y2="248" stroke="#324CC3" stroke-width=".8"/>
+            <line x1="100" y1="248" x2="145" y2="248" stroke="#324CC3" stroke-width=".8"/>
+            <text x="16" y="268" font-family="'Space Mono',monospace" font-size="9" fill="#324CC3">DEFLECTING MAGNETS</text>
+            <!-- PHOSPHORESCENT COATING -->
+            <line x1="360" y1="270" x2="240" y2="288" stroke="#324CC3" stroke-width=".8"/>
+            <text x="80" y="308" font-family="'Space Mono',monospace" font-size="9" fill="#324CC3">PHOSPHORESCENT COATING</text>
+            <!-- VACUUM TUBE -->
+            <line x1="220" y1="158" x2="220" y2="128" stroke="#324CC3" stroke-width=".8"/>
+            <text x="228" y="124" font-family="'Space Mono',monospace" font-size="9" fill="#324CC3">VACUUM TUBE</text>
+            <!-- ELECTRON BEAM -->
+            <line x1="240" y1="152" x2="280" y2="100" stroke="#324CC3" stroke-width=".8"/>
+            <text x="210" y="94" font-family="'Space Mono',monospace" font-size="9" fill="#324CC3">ELECTRON BEAM</text>
+            <!-- THICK LEAD GLASS -->
+            <line x1="404" y1="115" x2="456" y2="90" stroke="#324CC3" stroke-width=".8"/>
+            <text x="348" y="84" font-family="'Space Mono',monospace" font-size="9" fill="#324CC3">THICK LEAD GLASS</text>
+            <!-- LIGHT -->
+            <text x="458" y="176" font-family="'Space Mono',monospace" font-size="9" fill="#324CC3">LIGHT</text>
+          </svg>
+        </div>
+        <span class="ea-year-label">© 1980</span>
+        <span class="ea-subject-label">[ CATHODE RAY TUBE DISPLAY ]</span>
+      </div>
+
+      <!-- RIGHT — early access text -->
+      <div class="ea-text reveal">
+        <h2 class="ea-heading">Early Access</h2>
+        <p class="ea-body">You can now buy the book in early access. Just remember that it isn't finished yet — I'll be chipping away at it and releasing new chapters when they are ready.</p>
+        <a href="#" class="btn-access">GET EARLY ACCESS ($99)</a>
+        <p class="ea-mailing">Want some free chapters?<a href="#" class="link-dotted">Join the mailing list</a></p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════ TABLE OF CONTENTS ══════════════════════════════════ -->
+  <section class="toc-section-outer" id="contents">
+    <div class="wrap">
+
+      <div class="toc-title-wrap reveal">
+        <div class="toc-version mono">V1.0</div>
+        <div class="toc-heading-row">
+          <h2 class="toc-heading">Table of Contents.</h2>
+          <div class="toc-heading-rule"></div>
+          <div class="toc-toggle">
+            PROGRESS · <button class="toc-words-btn mono" id="words-toggle">WORDS</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="toc-grid reveal" id="toc-grid"></div>
+
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════ FOOTER ══════════════════════════════════ -->
+  <footer class="site">
+    <div class="wrap">
+      <div>
+        <div class="foot-title">Making Software</div>
+        <p class="foot-byline">Written and illustrated by Dan Hollick.<br>A reference manual for people who design and build software.</p>
+      </div>
+      <nav aria-label="Footer navigation">
+        <ul>
+          <li><a href="#contents" class="hl">Contents</a></li>
+          <li><a href="#about" class="hl">About</a></li>
+          <li><a href="#early-access" class="hl">Early Access</a></li>
+          <li><a href="https://twitter.com/DanHollick" class="hl">Twitter</a></li>
+        </ul>
+      </nav>
+      <div class="foot-bottom">
+        <span>© Making Software</span>
+        <span>Dan Hollick</span>
+      </div>
+    </div>
+  </footer>
+
+</div><!-- /#app -->
+
+<script>
+/* ══════════════════════════════════════════════════════════════
+   PAGE LOAD — letter materialise animation
+════════════════════════════════════════════════════════════════ */
+(function () {
+  const text = "MAKING SOFTWARE";
+  const loaderTitle = document.getElementById("loader-title");
+  text.split("").forEach((ch, i) => {
+    const span = document.createElement("span");
+    span.className = "lt";
+    span.textContent = ch === " " ? "\u00a0" : ch;
+    span.style.animationDelay = (i * 42) + "ms";
+    loaderTitle.appendChild(span);
+  });
+
+  const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const loader = document.getElementById("loader");
+  const app = document.getElementById("app");
+
+  function reveal() {
+    loader.classList.add("hidden");
+    app.classList.add("revealed");
+    setTimeout(() => { loader.style.display = "none"; }, 600);
+  }
+
+  window.addEventListener("load", () => {
+    setTimeout(reveal, prefersReduced ? 0 : 820);
+  });
+})();
+
+/* ══════════════════════════════════════════════════════════════
+   SCROLL REVEAL
+════════════════════════════════════════════════════════════════ */
+(function () {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add("visible"); observer.unobserve(e.target); }
+    });
+  }, { threshold: 0.08 });
+  document.querySelectorAll(".reveal").forEach(el => observer.observe(el));
+})();
+
+/* ══════════════════════════════════════════════════════════════
+   TABLE OF CONTENTS DATA (confirmed chapter titles + word counts)
+════════════════════════════════════════════════════════════════ */
+const TOC = [
+  { title: "Pixels and Color", chapters: [
+    { name: "How does a screen work?",     words: "3.6K" },
+    { name: "What is a color space?",      words: "6.2K" },
+    { name: "Blending modes.",             words: "1.9K" },
+    { name: "Digital images.",             words: "3.5K" },
+    { name: "Touch screens.",              words: "1.4K" },
+  ]},
+  { title: "Fonts and Vectors", chapters: [
+    { name: "Drawing curves.",             words: "2.0K" },
+    { name: "How to make a font.",         words: "6.1K" },
+    { name: "Rasterisation and anti-aliasing.", words: "1.8K" },
+    { name: "Scalable Vector Graphics.",   words: "4.4K" },
+    { name: "Boolean operations.",         words: "3.2K" },
+  ]},
+  { title: "3D and Graphics", chapters: [
+    { name: "How does a GPU work?",        words: "3.6K" },
+    { name: "Shaders.",                    words: "4.6K" },
+    { name: "Rays and SDFs.",             words: "2.0K" },
+    { name: "Blurs, noise and other effects.", words: "2.8K" },
+  ]},
+  { title: "AI and ML", chapters: [
+    { name: "Neural nets and transformers.", words: null },
+    { name: "Gradient descent and backpropagation.", words: null },
+    { name: "Embeddings and attention.",   words: null },
+    { name: "Generating images.",          words: null },
+  ]},
+  { title: "Data and Compression", chapters: [
+    { name: "Bits, bytes and binary.",     words: "3.1K" },
+    { name: "Entropy and compression.",    words: "5.1K" },
+    { name: "Image compression.",          words: "5.4K" },
+    { name: "Cryptography.",              words: "3.4K" },
+    { name: "How is data stored?",         words: "4.9K" },
+  ]},
+  { title: "Networking and The Web", chapters: [
+    { name: "Sending and receiving data.", words: "3.0K" },
+    { name: "How the internet works.",    words: "3.7K" },
+    { name: "What is a browser?",         words: null },
+  ]},
+  { title: "Compilers and Interpreters", chapters: [
+    { name: "What is code?",              words: null },
+    { name: "Compilers and interpreters.", words: null },
+    { name: "What makes code fast?",      words: null },
+  ]},
+  { title: "Misc", chapters: [
+    { name: "QR and barcodes.",           words: "2.1K" },
+    { name: "Quantum computing.",         words: null },
+  ]},
+];
+
+/* Build TOC two-column grid */
+(function () {
+  const grid = document.getElementById("toc-grid");
+  TOC.forEach((section, si) => {
+    const group = document.createElement("div");
+    group.className = "toc-group";
+
+    const title = document.createElement("div");
+    title.className = "toc-group-title mono";
+    title.textContent = (si + 1) + ". " + section.title.toUpperCase();
+    group.appendChild(title);
+
+    const list = document.createElement("div");
+    list.className = "toc-chapters";
+
+    section.chapters.forEach(ch => {
+      const row = document.createElement("a");
+      row.href = "#";
+      row.className = "toc-chapter-row" + (ch.words ? "" : " no-count");
+      row.addEventListener("click", e => e.preventDefault());
+
+      const bullet = document.createElement("span");
+      bullet.className = "toc-chapter-bullet";
+      bullet.textContent = "•";
+      row.appendChild(bullet);
+
+      const name = document.createElement("span");
+      name.className = "toc-chapter-name";
+      name.textContent = ch.name;
+      row.appendChild(name);
+
+      const leader = document.createElement("span");
+      leader.className = "toc-leader";
+      row.appendChild(leader);
+
+      const count = document.createElement("span");
+      count.className = "toc-word-count";
+      count.textContent = ch.words ? ch.words + " WORDS" : "";
+      row.appendChild(count);
+
+      list.appendChild(row);
+    });
+
+    group.appendChild(list);
+    grid.appendChild(group);
+  });
+
+  /* WORDS toggle (shows/hides word counts) */
+  let wordsVisible = true;
+  document.getElementById("words-toggle").addEventListener("click", () => {
+    wordsVisible = !wordsVisible;
+    document.querySelectorAll(".toc-word-count").forEach(el => {
+      el.style.visibility = wordsVisible ? "" : "hidden";
+    });
+    document.querySelectorAll(".toc-leader").forEach(el => {
+      el.style.opacity = wordsVisible ? "" : "0.3";
+    });
+  });
+})();
+
+/* ══════════════════════════════════════════════════════════════
+   MAILING LIST LINK
+════════════════════════════════════════════════════════════════ */
+document.querySelectorAll(".link-dotted").forEach(el => {
+  el.addEventListener("click", e => {
+    e.preventDefault();
+    alert("Subscribe to the mailing list at makingsoftware.com");
+  });
+});
+</script>
+</body>
+</html>

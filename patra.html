@@ -4,315 +4,1336 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>पत्र — Patra | The Objects of Kashi</title>
-<meta name="description" content="Patra — the sacred objects that revolve around the Kashi 3D temple, rendered in gold line: bel patra, damroo, diya, and the river boats of the ghats." />
+<meta name="description" content="Patra — a reference manual for the sacred objects that revolve around the Kashi 3D temple: bel patra, damroo, diya, and the river boats of the ghats." />
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500&family=Playfair+Display:ital,wght@0,500;0,600;1,400&family=Noto+Serif+Devanagari:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css">
+<!-- Fonts: Space Mono for the editorial-manual mono accents; Source Serif 4 for body; Noto Serif Devanagari for पत्र -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=Noto+Serif+Devanagari:wght@400;500&display=swap" rel="stylesheet" />
 
 <style>
-  /* Patra uses the site's shared dark + gold theme (css/style.css) as its
-     base — converting this page from its earlier light "reference manual"
-     look into the same golden dark mode as the rest of Kashi, per spec.
-     Everything below is page-specific layout on top of that shared base. */
+/* ══════════════════════════════════════════════════════════════
+   1. DESIGN TOKENS
+════════════════════════════════════════════════════════════════ */
+:root {
+  --background: #E8ECF5;
+  --surface:    #FFFFFF;
 
-  body.patra-page {
-    background: #0c0805;
-    color: #F4B942;
-  }
+  --ink:         #171717;
+  --muted:       #777777;
+  --muted-light: #848484;
 
-  .patra-hero {
-    min-height: 62vh;
+  /* Golden, to match the rest of the site — was blue in the original
+     "Making Software" reference design. */
+  --blue:        #A8710B;
+  --blue-light:  #D9A441;
+  --blue-soft:   #FBF1DC;
+  --blue-bright: #C9860F;
+
+  --rule: rgba(23, 23, 23, 0.14);
+
+  --grid-size: 16px;
+
+  --font-mono:  "Space Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --font-serif: "Source Serif 4", ui-serif, Georgia, serif;
+
+  --page-width: 1600px;
+  --page-padding: clamp(20px, 5vw, 96px);
+
+  --sp-1: 8px;
+  --sp-2: 16px;
+  --sp-3: 24px;
+  --sp-4: 32px;
+  --sp-5: 48px;
+  --sp-6: 64px;
+  --sp-7: 96px;
+  --sp-8: 128px;
+  --sp-9: 192px;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   1B. DARK / GOLDEN THEME — same token names, swapped values.
+   Since every rule below reads colors via var(...), flipping just
+   these tokens re-themes the entire page without touching a single
+   other rule. Light mode (default attribute-less state) is the
+   original "Making Software" look, fully preserved.
+════════════════════════════════════════════════════════════════ */
+html[data-theme="dark"] {
+  --background: #0c0805;
+  --surface:    #171008;
+
+  --ink:         #F2E4C8;
+  --muted:       rgba(244, 185, 66, 0.6);
+  --muted-light: rgba(244, 185, 66, 0.7);
+
+  --blue:        #F4B942;
+  --blue-light:  #E8C27A;
+  --blue-soft:   rgba(244, 185, 66, 0.08);
+  --blue-bright: #FFD979;
+
+  --rule: rgba(244, 185, 66, 0.18);
+}
+html { transition: background-color .35s ease; }
+body { transition: background-color .35s ease, color .35s ease; }
+
+/* ── Theme toggle switch ── */
+#theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  background: var(--blue-soft);
+  border: 1px solid var(--rule);
+  border-radius: 100px;
+  padding: 6px 12px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  transition: background .25s ease, border-color .25s ease, color .25s ease;
+}
+#theme-toggle:hover { color: var(--blue); border-color: var(--blue); }
+#theme-toggle .theme-icon { font-size: 12px; line-height: 1; }
+
+/* ── Site logo (top right, standalone) — tokens follow the theme ── */
+#site-logo {
+  position: fixed;
+  top: 20px; right: 24px;
+  z-index: 999;
+  height: 30px;
+  width: auto;
+  display: block;
+  border-radius: 6px;
+}
+@media (max-width: 900px) {
+  #site-logo { top: 12px; right: 12px; height: 24px; }
+}
+
+/* ── Patra page navigation (top left) — tokens follow the theme ── */
+#page-nav {
+  position: fixed;
+  top: 20px; left: 24px;
+  z-index: 998;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 10px;
+  max-width: 66vw;
+
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 100px;
+  padding: 8px 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  transition: background .35s ease, border-color .35s ease;
+}
+.page-nav-link {
+  color: var(--muted);
+  text-decoration: none;
+  transition: color .25s ease;
+}
+.page-nav-link:hover, .page-nav-link:focus-visible,
+.page-nav-link.active { color: var(--blue); }
+.page-nav-link.active { cursor: default; }
+.page-nav-sep { color: var(--rule); }
+@media (max-width: 900px) {
+  #page-nav { top: 12px; left: 12px; max-width: 78vw; gap: 7px; font-size: 9.5px; padding: 6px 12px; }
+}
+
+/* ── Mobile hamburger toggle ("tripundra" 3-line icon) ─── */
+.nav-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  width: 22px;
+  height: 22px;
+  background: none;
+  border: none;
+  padding: 0;
+  margin-right: 2px;
+  cursor: pointer;
+}
+.nav-toggle span {
+  display: block;
+  width: 17px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--blue);
+  transition: transform .3s ease, opacity .25s ease;
+}
+.nav-toggle[aria-expanded="true"] span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+.nav-toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+.nav-toggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+.page-nav-links { display: contents; }
+@media (max-width: 900px) {
+  .nav-toggle { display: flex; }
+  #page-nav { align-items: center; }
+  .page-nav-links {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    gap: 1.2rem;
-    padding: 14vh 6vw 6vh;
-  }
-  .patra-hero-eyebrow {
-    font-family: 'Outfit', sans-serif;
-    text-transform: uppercase;
-    font-size: 0.72rem;
-    letter-spacing: 0.35em;
-    color: rgba(244, 185, 66, 0.6);
-  }
-  .patra-hero-title {
-    font-family: 'Noto Serif Devanagari', serif;
-    font-size: clamp(3.2rem, 11vw, 7rem);
-    font-weight: 500;
-    color: #F4B942;
-    line-height: 1;
-  }
-  .patra-hero-sub {
-    font-family: 'Playfair Display', serif;
-    font-style: italic;
-    font-size: clamp(1.1rem, 2.4vw, 1.5rem);
-    color: rgba(244, 185, 66, 0.75);
-    max-width: 50ch;
-    line-height: 1.5;
-  }
-  .patra-hero-rule {
-    width: 48px; height: 1px;
-    background: #F4B942;
-    opacity: 0.5;
-    margin-top: 0.4rem;
-  }
-
-  /* ── FIG sections ── */
-  .fig-section {
-    display: flex;
-    align-items: center;
-    gap: 6vw;
-    padding: 8vh 8vw;
-    max-width: 1400px;
-    margin: 0 auto;
-  }
-  .fig-section.reverse { flex-direction: row-reverse; }
-
-  .fig-plate {
-    flex: 0 0 auto;
-    width: min(420px, 42vw);
-  }
-  .fig-plate-card {
-    background: linear-gradient(160deg, #F4EBD8, #EADFC4);
-    border-radius: 18px;
-    padding: 8%;
-    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(244, 185, 66, 0.15);
-  }
-  .fig-plate-card img {
-    display: block;
+    align-items: flex-start;
+    gap: 11px;
     width: 100%;
-    height: auto;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transition: max-height .35s ease, opacity .3s ease, margin-top .35s ease;
   }
-  .fig-plate-label {
-    margin-top: 1rem;
-    font-family: 'Outfit', sans-serif;
-    font-size: 0.68rem;
-    letter-spacing: 0.28em;
-    text-transform: uppercase;
-    color: rgba(244, 185, 66, 0.5);
-    text-align: center;
+  .page-nav-links.open {
+    max-height: 60vh;
+    opacity: 1;
+    pointer-events: auto;
+    margin-top: 9px;
+    padding-top: 9px;
+    border-top: 1px solid var(--rule);
   }
+  #page-nav.nav-open { border-radius: 24px; }
+  .page-nav-sep { display: none; }
+}
 
-  .fig-text {
-    flex: 1 1 auto;
-    max-width: 56ch;
-  }
-  .fig-eyebrow {
-    font-family: 'Outfit', sans-serif;
-    font-size: 0.7rem;
-    letter-spacing: 0.24em;
-    text-transform: uppercase;
-    color: rgba(244, 185, 66, 0.55);
-    margin-bottom: 0.6rem;
-  }
-  .fig-title {
-    font-family: 'Playfair Display', serif;
-    font-weight: 600;
-    font-size: clamp(1.8rem, 4vw, 2.6rem);
-    color: #F4B942;
-    margin-bottom: 0.2rem;
-  }
-  .fig-sanskrit {
-    font-family: 'Noto Serif Devanagari', serif;
-    font-size: 1.1rem;
-    color: rgba(244, 185, 66, 0.6);
-    margin-bottom: 1.3rem;
-  }
-  .fig-body {
-    font-family: 'Outfit', sans-serif;
-    font-weight: 300;
-    font-size: 1.02rem;
-    line-height: 1.85;
-    color: rgba(243, 230, 207, 0.78);
-    margin-bottom: 1.6rem;
-  }
-  .fig-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-family: 'Outfit', sans-serif;
-    font-size: 0.82rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: #F4B942;
-    text-decoration: none;
-    border-bottom: 1px solid rgba(244, 185, 66, 0.35);
-    padding-bottom: 3px;
-    transition: border-color 0.25s ease, opacity 0.25s ease, gap 0.25s ease;
-  }
-  .fig-link:hover, .fig-link:focus-visible {
-    border-color: #F4B942;
-    gap: 0.8rem;
-  }
+/* ══════════════════════════════════════════════════════════════
+   2. RESET & BASE
+════════════════════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--ink);
+  font-family: var(--font-serif);
+  font-size: 17px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+img, svg { display: block; max-width: 100%; }
+a { color: inherit; }
+h1, h2, h3, h4 { font-weight: 400; margin: 0; }
+p { margin: 0; }
+ul { list-style: none; margin: 0; padding: 0; }
+button, input { font: inherit; color: inherit; background: none; border: none; }
 
-  .fig-divider {
-    max-width: 1400px;
-    margin: 0 auto;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(244, 185, 66, 0.18), transparent);
-  }
+.mono { font-family: var(--font-mono); text-transform: uppercase; }
 
-  @media (max-width: 900px) {
-    .fig-section, .fig-section.reverse {
-      flex-direction: column;
-      text-align: center;
-      padding: 7vh 7vw;
-      gap: 2.4rem;
-    }
-    .fig-plate { width: min(340px, 72vw); }
-    .fig-text { max-width: 60ch; }
+.wrap {
+  max-width: var(--page-width);
+  margin: 0 auto;
+  padding-left: var(--page-padding);
+  padding-right: var(--page-padding);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   3. GRAPH-PAPER GRID TEXTURE
+════════════════════════════════════════════════════════════════ */
+.grid-surface {
+  background-image:
+    linear-gradient(rgba(168, 113, 11, .07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(168, 113, 11, .07) 1px, transparent 1px);
+  background-size: var(--grid-size) var(--grid-size);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   4. HAND-DRAWN WAVY BLUE UNDERLINE
+════════════════════════════════════════════════════════════════ */
+.hl {
+  position: relative;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: color .25s ease-out;
+}
+.hl::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 100%; bottom: -3px;
+  height: 7px;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='26' height='7'><path d='M0,4 Q6.5,0.5 13,4 T26,4' stroke='%23A8710B' stroke-width='1.6' fill='none' stroke-linecap='round'/></svg>");
+  background-repeat: repeat-x;
+  background-size: 26px 7px;
+  opacity: 0;
+  transition: right .45s ease-out, opacity .2s ease-out;
+}
+.hl:hover, .hl:focus-visible { color: var(--blue); }
+.hl:hover::after, .hl:focus-visible::after { right: 0; opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .hl::after { transition: none; } }
+
+/* Dotted underline for mailing list link */
+.link-dotted {
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.link-dotted:hover { color: var(--blue); }
+
+/* ══════════════════════════════════════════════════════════════
+   5. STIPPLE SEPARATOR ROW
+════════════════════════════════════════════════════════════════ */
+.stipple {
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  padding: 0;
+  line-height: 1;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .05em;
+  color: rgba(168, 113, 11, 0.22);
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+.stipple-chars {
+  flex: 1;
+  overflow: hidden;
+  height: 1.1em;
+  display: flex;
+  align-items: center;
+}
+.stipple-title {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .2em;
+  color: var(--muted-light);
+  text-transform: uppercase;
+  white-space: nowrap;
+  padding: 0 1em;
+  flex-shrink: 0;
+}
+/* Generates repeating ░ without JS by repeating a long string */
+.stipple-chars::before {
+  content: "░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░";
+  overflow: hidden;
+  display: block;
+  width: 100%;
+}
+.stipple.with-title {
+  padding: 3px 0;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   6. PAGE LOADER — sequential logo reveal + golden bar, same as
+   every other page on the site.
+════════════════════════════════════════════════════════════════ */
+#loader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--background);
+  pointer-events: none;
+  transition: opacity .5s ease .1s;
+  will-change: opacity;
+}
+#loader.hidden { opacity: 0; pointer-events: none; }
+
+.loader-stage {
+  position: relative;
+  width: min(300px, 62vw);
+  aspect-ratio: 508 / 465;
+}
+.loader-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0;
+  filter: drop-shadow(0 0 26px rgba(168, 113, 11, 0.28));
+  animation: loader-cycle 5s cubic-bezier(0.45, 0, 0.2, 1) infinite;
+}
+.loader-img:nth-child(1) { animation-delay: 0s; }
+.loader-img:nth-child(2) { animation-delay: -1s; }
+.loader-img:nth-child(3) { animation-delay: -2s; }
+.loader-img:nth-child(4) { animation-delay: -3s; }
+.loader-img:nth-child(5) { animation-delay: -4s; }
+@keyframes loader-cycle {
+  0%   { opacity: 0; transform: scale(0.97); }
+  6%   { opacity: 1; transform: scale(1); }
+  16%  { opacity: 1; transform: scale(1); }
+  22%  { opacity: 0; transform: scale(1.02); }
+  100% { opacity: 0; transform: scale(1.02); }
+}
+.loader-bar-track {
+  position: relative;
+  width: min(210px, 46vw);
+  height: 3px;
+  margin-top: 34px;
+  background: rgba(168, 113, 11, 0.16);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.loader-bar-fill {
+  position: absolute;
+  top: 0; left: 0;
+  height: 100%;
+  width: 42%;
+  border-radius: 3px;
+  background: linear-gradient(90deg,
+    transparent,
+    var(--blue) 30%,
+    #fff3d6 50%,
+    var(--blue) 70%,
+    transparent);
+  animation: loader-bar-roll 1s linear infinite;
+}
+@keyframes loader-bar-roll {
+  0%   { transform: translateX(-120%); }
+  100% { transform: translateX(340%); }
+}
+
+#app {
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity .7s ease, transform .7s ease;
+}
+#app.revealed { opacity: 1; transform: translateY(0); }
+
+/* ══════════════════════════════════════════════════════════════
+   7. HEADER
+════════════════════════════════════════════════════════════════ */
+header.site {
+  /* Top padding clears the fixed #page-nav pill (top:20px, ~48px tall on
+     desktop) so the PATRA title never sits under it. */
+  padding: clamp(88px, 9vw, 104px) 0 clamp(16px, 2vw, 28px);
+}
+@media (max-width: 900px) {
+  header.site {
+    /* Below 900px the nav pill wraps to two rows (hamburger + theme
+       toggle), ~80px tall at top:12px — needs more clearance. */
+    padding-top: 116px;
   }
+}
+header.site .wrap {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: flex-start;
+  gap: var(--sp-5);
+}
+.site-title {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: clamp(32px, 5.5vw, 72px);
+  color: var(--blue);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  line-height: 1;
+  /* Each letter is a span for the load animation but also just works as text */
+}
+.site-descriptor {
+  text-align: right;
+  font-family: var(--font-serif);
+  font-size: clamp(13px, 1.1vw, 15px);
+  line-height: 1.55;
+  color: var(--ink);
+  padding-top: .4em;
+}
+.site-descriptor strong {
+  display: block;
+  font-weight: 600;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   8. HERO — editorial two-column
+════════════════════════════════════════════════════════════════ */
+.hero {
+  padding: var(--sp-5) 0 var(--sp-6);
+}
+.hero .wrap {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  gap: 0;
+  align-items: stretch;
+  position: relative;
+}
+
+/* LEFT — editorial text column */
+.hero-editorial {
+  padding-right: clamp(24px, 3vw, 56px);
+  position: relative;
+  padding-left: 28px; /* room for FIG label */
+}
+.hero-editorial-inner {
+  padding-top: var(--sp-3);
+}
+
+/* Drop capital */
+.drop-cap::first-letter {
+  float: left;
+  font-size: 4.2em;
+  line-height: .78;
+  padding-right: .06em;
+  padding-top: .06em;
+  font-weight: 400;
+  color: var(--ink);
+  font-family: var(--font-serif);
+}
+
+.hero-para {
+  font-family: var(--font-serif);
+  font-size: clamp(14px, 1.1vw, 16px);
+  line-height: 1.72;
+  color: var(--ink);
+  text-align: justify;
+  hyphens: auto;
+  margin-bottom: var(--sp-3);
+}
+
+/* Small inline diagram */
+.inline-diagram {
+  position: relative;
+  margin: var(--sp-3) 0;
+  padding-left: 28px;
+}
+.inline-diagram svg {
+  width: 100%;
+  max-width: 260px;
+  height: auto;
+}
+
+/* Rotated FIG label on left margin */
+.fig-label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--blue);
+  opacity: .7;
+  user-select: none;
+}
+
+/* RIGHT — large floppy disk diagram */
+.hero-diagram-col {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+}
+.hero-main-diagram {
+  flex: 1;
+  position: relative;
+  padding: var(--sp-4);
+}
+.hero-main-diagram svg {
+  width: 100%;
+  height: auto;
+  min-height: 380px;
+}
+/* Rotated right-edge label */
+.diagram-subject-label {
+  position: absolute;
+  right: -2px;
+  top: 50%;
+  transform: translateY(-50%);
+  writing-mode: vertical-rl;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  opacity: .6;
+  user-select: none;
+}
+.hero-diagram-col .fig-label {
+  left: 4px;
+  top: 50%;
+  transform: translateY(-50%) rotate(180deg);
+  writing-mode: vertical-rl;
+}
+.fig-plate-link {
+  text-align: center;
+  margin-top: var(--sp-2);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   9. EDITORIAL CONTENT BLOCK (Bézier / about)
+════════════════════════════════════════════════════════════════ */
+.editorial {
+  padding: var(--sp-7) 0;
+}
+.editorial .wrap {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  gap: 0;
+  align-items: center;
+}
+
+/* Bézier diagram side */
+.ed-diagram {
+  position: relative;
+  padding: var(--sp-5);
+  padding-left: 40px;
+}
+.ed-diagram svg {
+  width: 100%;
+  max-width: 420px;
+  height: auto;
+}
+.ed-diagram .fig-label {
+  top: var(--sp-3);
+}
+
+/* Text side */
+.ed-text {
+  padding-left: clamp(24px, 4vw, 72px);
+  padding-right: clamp(20px, 3vw, 56px);
+}
+.ed-text .stipple-meta {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: .14em;
+  color: rgba(168, 113, 11, 0.28);
+  margin-bottom: var(--sp-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
+}
+.ed-section-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: .14em;
+  color: rgba(168, 113, 11, 0.3);
+  text-transform: uppercase;
+  margin-bottom: var(--sp-4);
+  overflow: hidden;
+  white-space: nowrap;
+}
+.ed-lead {
+  font-family: var(--font-serif);
+  font-size: clamp(15px, 1.15vw, 17px);
+  line-height: 1.7;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: var(--sp-4);
+}
+.ed-para {
+  font-family: var(--font-serif);
+  font-size: clamp(14px, 1.05vw, 15px);
+  line-height: 1.78;
+  color: var(--ink);
+  text-align: justify;
+  hyphens: auto;
+  margin-bottom: var(--sp-3);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   10. EARLY ACCESS CTA
+════════════════════════════════════════════════════════════════ */
+.early-access {
+  padding: var(--sp-7) 0;
+}
+.early-access .wrap {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: 0;
+  align-items: center;
+}
+
+/* CRT diagram side */
+.ea-diagram {
+  position: relative;
+  padding: var(--sp-5);
+  padding-left: 40px;
+}
+.ea-diagram svg {
+  width: 100%;
+  max-width: 520px;
+  height: auto;
+}
+.ea-diagram .fig-label { top: var(--sp-3); }
+.ea-year-label {
+  position: absolute;
+  right: 14px;
+  bottom: 40px;
+  writing-mode: vertical-rl;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--muted-light);
+  opacity: .5;
+  letter-spacing: .12em;
+}
+.ea-subject-label {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  writing-mode: vertical-rl;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  opacity: .55;
+}
+
+/* Text side */
+.ea-text {
+  padding-left: clamp(32px, 4vw, 72px);
+  padding-right: clamp(20px, 3vw, 48px);
+}
+.ea-heading {
+  font-family: var(--font-serif);
+  font-size: clamp(1.2rem, 1.8vw, 1.5rem);
+  font-weight: 600;
+  margin-bottom: var(--sp-2);
+}
+.ea-body {
+  font-family: var(--font-serif);
+  font-size: clamp(14px, 1.05vw, 15px);
+  line-height: 1.72;
+  color: var(--ink);
+  margin-bottom: var(--sp-4);
+}
+.btn-access {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 12px 20px;
+  border: 1px solid var(--ink);
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  transition: color .2s ease, border-color .2s ease, background .2s ease;
+  margin-bottom: var(--sp-3);
+  white-space: nowrap;
+}
+.btn-access:hover {
+  color: var(--blue);
+  border-color: var(--blue);
+  background: var(--blue-soft);
+}
+.ea-mailing {
+  font-family: var(--font-serif);
+  font-size: 15px;
+  color: var(--ink);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   11. TABLE OF CONTENTS
+════════════════════════════════════════════════════════════════ */
+.toc-section-outer {
+  padding: var(--sp-7) 0 var(--sp-8);
+}
+
+/* Header row */
+.toc-header {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-6);
+}
+.toc-version {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: .14em;
+  color: var(--muted-light);
+  text-transform: uppercase;
+  white-space: nowrap;
+  margin-bottom: 4px;
+}
+.toc-title-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  flex: 1;
+}
+.toc-heading-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  width: 100%;
+}
+.toc-heading {
+  font-family: var(--font-serif);
+  font-size: clamp(1.4rem, 2.2vw, 1.9rem);
+  font-weight: 400;
+  white-space: nowrap;
+}
+.toc-heading-rule {
+  flex: 1;
+  height: 1px;
+  background: var(--ink);
+  opacity: .18;
+}
+.toc-toggle {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+  cursor: pointer;
+  display: flex;
+  gap: .4em;
+  align-items: center;
+}
+.toc-toggle .toc-words-btn {
+  color: var(--blue);
+  cursor: pointer;
+  background: none;
+  border: none;
+  font: inherit;
+  letter-spacing: inherit;
+  padding: 0;
+}
+.toc-toggle .toc-words-btn:hover { text-decoration: underline; }
+
+/* Two-column grid */
+.toc-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-5) var(--sp-7);
+  align-items: start;
+}
+
+.toc-group {}
+.toc-group-title {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ink);
+  margin-bottom: var(--sp-3);
+  padding-bottom: var(--sp-1);
+}
+.toc-chapters { display: flex; flex-direction: column; gap: 0; }
+.toc-chapter-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0;
+  padding: 7px 0;
+  text-decoration: none;
+  color: var(--ink);
+  transition: color .18s ease;
+  position: relative;
+  cursor: pointer;
+}
+.toc-chapter-row:hover { color: var(--blue); }
+.toc-chapter-bullet {
+  font-family: var(--font-serif);
+  font-size: 15px;
+  margin-right: 6px;
+  flex-shrink: 0;
+}
+.toc-chapter-name {
+  font-family: var(--font-serif);
+  font-size: 15px;
+  flex-shrink: 0;
+}
+/* Dotted leader line */
+.toc-leader {
+  flex: 1;
+  border-bottom: 1px dotted rgba(23, 23, 23, .3);
+  margin: 0 6px;
+  position: relative;
+  top: -3px;
+  min-width: 20px;
+}
+.toc-chapter-row.no-count .toc-leader {
+  border-bottom-color: rgba(23, 23, 23, .1);
+}
+.toc-word-count {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted-light);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   12. FOOTER — same arrangement as every other page: a centred
+   "Crafted at Twashta Labs" line first, then a copyright-left /
+   nav-list-and-logo-right row. Only the color tokens are Patra's own.
+════════════════════════════════════════════════════════════════ */
+footer.site {
+  padding: var(--sp-6) 0 var(--sp-5);
+  border-top: 1px solid var(--rule);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-4);
+}
+.foot-crafted {
+  order: -1;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--blue);
+}
+.footer-main {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--sp-5);
+}
+.footer-col--left { display: flex; flex-direction: column; gap: 6px; }
+.footer-copy {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .04em;
+  color: var(--muted);
+}
+.footer-col--right {
+  display: flex;
+  align-items: flex-end;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.footer-nav {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+.footer-nav a {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--muted);
+  transition: color .18s ease;
+}
+.footer-nav a:hover, .footer-nav a:focus-visible { color: var(--blue); }
+.footer-logo { height: 48px; width: auto; display: block; border-radius: 6px; }
+
+@media (max-width: 700px) {
+  footer.site { align-items: flex-start; }
+  .foot-crafted { text-align: left; width: 100%; font-size: 11px; }
+  .footer-main { flex-direction: column; align-items: flex-start; gap: 20px; }
+  .footer-col--right { align-items: flex-start; justify-content: flex-start; }
+  .footer-nav { align-items: flex-start; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   13. SCROLL REVEAL
+════════════════════════════════════════════════════════════════ */
+.reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity .6s ease, transform .6s ease;
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   14. RESPONSIVE
+════════════════════════════════════════════════════════════════ */
+@media (max-width: 1100px) {
+  .hero .wrap,
+  .editorial .wrap,
+  .early-access .wrap {
+    grid-template-columns: 1fr;
+  }
+  .ed-text { padding-left: 0; padding-right: 0; }
+  .ea-text { padding-left: 0; padding-right: 0; }
+  .toc-grid { grid-template-columns: 1fr; gap: var(--sp-5); }
+}
+
+@media (max-width: 767px) {
+  body { font-size: 16px; }
+  .site-title { font-size: clamp(24px, 10vw, 44px); }
+  header.site .wrap { grid-template-columns: 1fr; gap: var(--sp-2); }
+  .site-descriptor { text-align: left; }
+  .hero-editorial { padding-right: 0; }
+  /* hero-main-diagram now holds a clean golden image (not a busy technical
+     diagram), so — unlike the original — it stays visible on mobile. */
+  .ed-diagram svg { max-width: 100%; }
+  .ea-diagram svg { max-width: 100%; }
+}
 </style>
 </head>
-<body class="patra-page">
+<body>
 
-  <!-- ── Preloader: sequential logo reveal + golden loading bar ─────────── -->
-  <div id="loader">
-    <div class="loader-stage" aria-hidden="true">
-      <img class="loader-img" src="loading_images/1_cropped.png" alt="" loading="eager" fetchpriority="high">
-      <img class="loader-img" src="loading_images/2_cropped.png" alt="" loading="eager" fetchpriority="high">
-      <img class="loader-img" src="loading_images/3_cropped.png" alt="" loading="eager" fetchpriority="high">
-      <img class="loader-img" src="loading_images/4_cropped.png" alt="" loading="eager" fetchpriority="high">
-      <img class="loader-img" src="loading_images/5_cropped.png" alt="" loading="eager" fetchpriority="high">
-    </div>
-    <div class="loader-bar-track">
-      <div class="loader-bar-fill"></div>
-    </div>
+<!-- ══════════════════════════════════ LOADER ══════════════════════════════════ -->
+<div id="loader">
+  <div class="loader-stage" aria-hidden="true">
+    <img class="loader-img" src="loading_images/1_cropped.png" alt="" loading="eager" fetchpriority="high">
+    <img class="loader-img" src="loading_images/2_cropped.png" alt="" loading="eager" fetchpriority="high">
+    <img class="loader-img" src="loading_images/3_cropped.png" alt="" loading="eager" fetchpriority="high">
+    <img class="loader-img" src="loading_images/4_cropped.png" alt="" loading="eager" fetchpriority="high">
+    <img class="loader-img" src="loading_images/5_cropped.png" alt="" loading="eager" fetchpriority="high">
   </div>
+  <div class="loader-bar-track">
+    <div class="loader-bar-fill"></div>
+  </div>
+</div>
 
-  <!-- ── Page navigation (top right) ─────────────────────────────────── -->
-  <nav id="page-nav" aria-label="Page navigation">
-    <img class="nav-logo" src="loading_images/5_cropped.png" alt="Banarasi Bhaukal">
-    <a href="index.html" class="page-nav-link">Home</a>
+<!-- ── Page navigation (top right) ─────────────────────────────────── -->
+<img id="site-logo" src="loading_images/5_cropped.png" alt="Banarasi Bhaukal">
+
+<nav id="page-nav" aria-label="Page navigation">
+  <button id="nav-toggle" class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="page-nav-links">
+    <a href="page2.html" class="page-nav-link">Home</a>
     <span class="page-nav-sep">|</span>
     <a href="explore-kashi.html" class="page-nav-link">Explore Kashi</a>
     <span class="page-nav-sep">|</span>
-    <a href="page2.html" class="page-nav-link">Manikarnika</a>
+    <a href="index.html" class="page-nav-link">Explore Ghats</a>
     <span class="page-nav-sep">|</span>
     <span class="page-nav-link active" aria-current="page">Patra</span>
     <span class="page-nav-sep">|</span>
     <a href="about.html" class="page-nav-link">About</a>
-    <span class="page-nav-sep">|</span>
-    <a href="bio.html" class="page-nav-link">Bio</a>
-  </nav>
+  </div>
+  <button id="theme-toggle" type="button" aria-pressed="true">
+    <span class="theme-icon" aria-hidden="true">☀︎</span><span id="theme-toggle-label">Light</span>
+  </button>
+</nav>
 
-  <!-- ── Hero ─────────────────────────────────────────────────────────── -->
-  <header class="patra-hero">
-    <span class="patra-hero-eyebrow">Fig. Series · Objects of Devotion</span>
-    <h1 class="patra-hero-title">पत्र</h1>
-    <p class="patra-hero-sub">The sacred objects that revolve around the Kashi temple — drawn in gold line, one leaf at a time.</p>
-    <div class="patra-hero-rule"></div>
+<div id="app">
+
+  <!-- ══════════════════════════════════ HEADER ══════════════════════════════════ -->
+  <header class="site">
+    <div class="wrap">
+      <h1 class="site-title" id="site-title">PATRA</h1>
+      <div class="site-descriptor">
+        The sacred objects that revolve around the Kashi temple — in gold line and story.<br>
+        <strong>पत्र · Banarasi Bhaukal.</strong>
+      </div>
+    </div>
   </header>
 
-  <!-- ── FIG.01 — Bel Patra ───────────────────────────────────────────── -->
-  <section class="fig-section" aria-labelledby="fig-01-title">
-    <div class="fig-plate">
-      <div class="fig-plate-card">
-        <img src="patra_elements/bela_patra.png" alt="Golden line illustration of a three-leafed bel patra (bael leaf)">
+  <!-- Stipple separator below header -->
+  <div class="stipple" aria-hidden="true">
+    <div class="stipple-chars"></div>
+  </div>
+
+  <!-- ══════════════════════════════════ HERO — FIG.01 BEL PATRA ══════════════════════════════════ -->
+  <section class="hero" id="fig-bel-patra">
+    <div class="wrap">
+
+      <!-- LEFT — editorial body text -->
+      <div class="hero-editorial reveal">
+        <span class="fig-label">FIG.01</span>
+        <div class="hero-editorial-inner">
+
+          <p class="hero-para drop-cap">Have you ever wondered why Shiva is offered a leaf instead of a flower? The bel patra — the three-leafed bael, Aegle marmelos — is the most beloved offering in all of Kashi. Its trefoil shape is read as the Trimurti itself: creation, preservation, and destruction, held together at a single stem.</p>
+
+          <p class="hero-para">Every dawn before the streets have properly woken, devotees carry garlands of it through Vishwanath Gali toward the temple — a procession so old that no one can point to when it began, only to the fact that it has never stopped.</p>
+
+          <p class="hero-para">The leaf is never offered face-down. Convention holds that the smooth, glossy side must face the lingam — a small rule, quietly kept, generation after generation.</p>
+
+          <p class="hero-para">Bael has a second life too: its pulp and leaves appear in Ayurvedic texts as a digestive remedy, so the same tree that furnishes the temple also furnishes the physician.</p>
+
+        </div>
       </div>
-      <div class="fig-plate-label">FIG. 01 — बेल पत्र</div>
-    </div>
-    <div class="fig-text">
-      <div class="fig-eyebrow">Spiritual Layer</div>
-      <h2 class="fig-title" id="fig-01-title">Bel Patra</h2>
-      <div class="fig-sanskrit">बेल पत्र · the three-leafed bael</div>
-      <p class="fig-body">The three-leafed bael (Aegle marmelos) is Shiva's most beloved offering. Kashi's devotees carry garlands of it to Vishwanath every dawn — a ritual so old that its origin has no date, only its unbroken continuation. Each leaf is said to stand for one face of the Trimurti: creation, preservation, and destruction, laid together at the feet of the god who holds all three.</p>
-      <a class="fig-link" href="explore-kashi.html">Meet Bel Patta in the 3D temple →</a>
+
+      <!-- RIGHT — bel patra plate -->
+      <div class="hero-diagram-col reveal">
+        <div class="hero-main-diagram grid-surface">
+          <span class="fig-label" style="position:absolute;left:6px;top:50%;transform:translateY(-50%) rotate(180deg);writing-mode:vertical-rl;">FIG.01</span>
+          <img src="patra_elements/bela_patra.png" alt="Golden line illustration of a three-leafed bel patra (bael leaf)" style="width:100%;height:auto;max-height:560px;object-fit:contain;">
+          <span class="diagram-subject-label">[ बेल पत्र — BEL PATRA ]</span>
+        </div>
+        <p class="fig-plate-link"><a class="hl" href="explore-kashi.html">Meet Bel Patta in the 3D temple →</a></p>
+      </div>
+
     </div>
   </section>
 
-  <div class="fig-divider"></div>
+  <!-- Stipple separator with title -->
+  <div class="stipple with-title" aria-hidden="true">
+    <div class="stipple-chars"></div>
+    <span class="stipple-title">Patra</span>
+    <div class="stipple-chars"></div>
+  </div>
 
-  <!-- ── FIG.02 — Damroo ──────────────────────────────────────────────── -->
-  <section class="fig-section reverse" aria-labelledby="fig-02-title">
-    <div class="fig-plate">
-      <div class="fig-plate-card">
-        <img src="patra_elements/damroo.png" alt="Golden line illustration of a damroo, Shiva's hourglass drum">
+  <!-- ══════════════════════════════════ FIG.02 DAMROO ══════════════════════════════════ -->
+  <section class="editorial" id="fig-damroo">
+    <div class="wrap">
+
+      <!-- LEFT — damroo plate -->
+      <div class="ed-diagram reveal" style="position:relative;">
+        <span class="fig-label">FIG.02</span>
+        <div class="grid-surface" style="padding: var(--sp-5) var(--sp-4); display:flex; align-items:center; justify-content:center;">
+          <img src="patra_elements/damroo.png" alt="Golden line illustration of a damroo, Shiva's hourglass drum" style="width:100%;max-width:340px;height:auto;">
+        </div>
       </div>
-      <div class="fig-plate-label">FIG. 02 — डमरू</div>
-    </div>
-    <div class="fig-text">
-      <div class="fig-eyebrow">Cultural Knowledge</div>
-      <h2 class="fig-title" id="fig-02-title">Damroo</h2>
-      <div class="fig-sanskrit">डमरू · the hourglass drum</div>
-      <p class="fig-body">Shiva's hourglass drum, whose first beat is said to have split cosmic silence into the fourteen foundational sounds of Sanskrit — the Maheshvara Sutras from which Panini built the grammar of an entire civilisation. In Kashi's lanes the damroo still marks processions and still calls attention the way it always has: rhythm arriving before language.</p>
-      <a class="fig-link" href="explore-kashi.html">Meet the Damroo in the 3D temple →</a>
+
+      <!-- RIGHT — editorial text -->
+      <div class="ed-text reveal">
+        <div class="ed-section-label">░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░</div>
+        <p class="ed-lead"><strong>डमरू · Damroo — the hourglass drum</strong></p>
+        <p class="ed-para">Shiva's small hourglass drum is said to have sounded the first beat of creation — a rhythm out of which language itself was born. Fourteen distinct sounds rang from it, the Maheshvara Sutras, and from those fourteen sounds the grammarian Panini built the entire architecture of Sanskrit.</p>
+        <p class="ed-para">It is played by twisting the wrist so the knotted cords strike each drumhead in turn — a single motion, an unbroken pulse. In Kashi's lanes it still marks processions and sadhus still carry it, calling attention the old way: rhythm arriving before any word does.</p>
+        <p class="ed-para">Nada Brahma — "sound is god" — is the philosophy that grew from this: that the universe itself is fundamentally vibrational, and every instrument in Varanasi's classical music lineages traces some part of its logic back to this one drum.</p>
+        <p class="ed-para"><a class="hl" href="explore-kashi.html">Meet the Damroo in the 3D temple →</a></p>
+      </div>
+
     </div>
   </section>
 
-  <div class="fig-divider"></div>
+  <!-- Stipple separator with title -->
+  <div class="stipple with-title" aria-hidden="true">
+    <div class="stipple-chars"></div>
+    <span class="stipple-title">Patra</span>
+    <div class="stipple-chars"></div>
+  </div>
 
-  <!-- ── FIG.03 — Ganga Diya ──────────────────────────────────────────── -->
-  <section class="fig-section" aria-labelledby="fig-03-title">
-    <div class="fig-plate">
-      <div class="fig-plate-card">
-        <img src="patra_elements/diya.png" alt="Golden line illustration of a diya, an earthen oil lamp">
+  <!-- ══════════════════════════════════ FIG.03 DIYA ══════════════════════════════════ -->
+  <section class="early-access" id="fig-diya">
+    <div class="wrap">
+
+      <!-- LEFT — diya plate -->
+      <div class="ea-diagram reveal" style="position:relative;">
+        <span class="fig-label">FIG.03</span>
+        <div class="grid-surface" style="padding: var(--sp-5) var(--sp-4); display:flex; align-items:center; justify-content:center;">
+          <img src="patra_elements/diya.png" alt="Golden line illustration of a diya, an earthen oil lamp" style="width:100%;max-width:420px;height:auto;">
+        </div>
+        <span class="ea-subject-label">[ गंगा दीया — GANGA DIYA ]</span>
       </div>
-      <div class="fig-plate-label">FIG. 03 — गंगा दीया</div>
-    </div>
-    <div class="fig-text">
-      <div class="fig-eyebrow">Cultural Knowledge</div>
-      <h2 class="fig-title" id="fig-03-title">Ganga Diya</h2>
-      <div class="fig-sanskrit">गंगा दीया · the river's lamp</div>
-      <p class="fig-body">Each evening at Dashashwamedh Ghat, hundreds of earthen diyas are set upon the Ganga during the Aarti — each flame a small, floating prayer, ascending toward the infinite through fire and current. The clay comes from the Kumhar potters of Varanasi, who have shaped these lamps by hand for generations, unhurried and unbroken.</p>
-      <a class="fig-link" href="explore-kashi.html">Meet the Diya in the 3D temple →</a>
+
+      <!-- RIGHT — text + link to 3D temple -->
+      <div class="ea-text reveal">
+        <h2 class="ea-heading">Ganga Diya</h2>
+        <p class="ea-body">Each evening at Dashashwamedh Ghat, hundreds of earthen diyas are set upon the Ganga during the Aarti — each flame a small, floating prayer, ascending toward the infinite through fire and current. The clay comes from the Kumhar potters of Varanasi, shaped by hand for generations, unhurried and unbroken.</p>
+        <a href="explore-kashi.html" class="btn-access">MEET THE DIYA IN THE 3D TEMPLE</a>
+        <p class="ea-mailing">Curious what else revolves around the temple?<a href="explore-kashi.html" class="link-dotted">Explore Kashi</a></p>
+      </div>
+
     </div>
   </section>
 
-  <div class="fig-divider"></div>
+  <!-- Stipple separator with title -->
+  <div class="stipple with-title" aria-hidden="true">
+    <div class="stipple-chars"></div>
+    <span class="stipple-title">Patra</span>
+    <div class="stipple-chars"></div>
+  </div>
 
-  <!-- ── FIG.04 — Boat ────────────────────────────────────────────────── -->
-  <section class="fig-section reverse" aria-labelledby="fig-04-title">
-    <div class="fig-plate">
-      <div class="fig-plate-card">
-        <img src="patra_elements/boat.png" alt="Golden line illustration of a traditional covered river boat on the Ganga">
+  <!-- ══════════════════════════════════ FIG.04 BOAT ══════════════════════════════════ -->
+  <section class="editorial" id="fig-boat">
+    <div class="wrap" style="grid-template-columns: minmax(0,3fr) minmax(0,2fr);">
+
+      <!-- LEFT — editorial text -->
+      <div class="ed-text reveal" style="padding-left:0;">
+        <div class="ed-section-label">░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░</div>
+        <p class="ed-lead"><strong>नाव · The river boat</strong></p>
+        <p class="ed-para">Not one of the four objects that revolve around the temple, but present in almost every frame of Kashi all the same: the wooden boats that have carried pilgrims, the dead, and the everyday since long before the ghats had names.</p>
+        <p class="ed-para">They are how most people first see the city — from the water, looking back at a skyline of temples reflected in the Ganga. Boatmen's families have worked the same short stretches of river for generations, ferrying bathers at dawn and Aarti-watchers at dusk.</p>
+        <p class="ed-para"><a class="hl" href="index.html">See the ghats where these boats still gather →</a></p>
       </div>
-      <div class="fig-plate-label">FIG. 04 — नाव</div>
-    </div>
-    <div class="fig-text">
-      <div class="fig-eyebrow">The Ghats</div>
-      <h2 class="fig-title" id="fig-04-title">The River Boat</h2>
-      <div class="fig-sanskrit">नाव · vessel of the Ganga</div>
-      <p class="fig-body">Not one of the four objects that revolve around the temple, but present in almost every frame of Kashi all the same: the wooden boats that have carried pilgrims, the dead, and the everyday since before the ghats had names. They are how most people first see the city — from the water, looking back at a skyline of temples reflected in the Ganga.</p>
-      <a class="fig-link" href="index.html">See the ghats where these boats still gather →</a>
+
+      <!-- RIGHT — boat plate -->
+      <div class="ed-diagram reveal" style="position:relative; padding-left:var(--sp-5);">
+        <span class="fig-label">FIG.04</span>
+        <div class="grid-surface" style="padding: var(--sp-5) var(--sp-4); display:flex; align-items:center; justify-content:center;">
+          <img src="patra_elements/boat.png" alt="Golden line illustration of a traditional covered river boat on the Ganga" style="width:100%;max-width:340px;height:auto;">
+        </div>
+      </div>
+
     </div>
   </section>
 
-  <!-- ── Footer ───────────────────────────────────────────────────────── -->
-  <footer id="site-footer">
-    <div class="footer-col--left">
-      <p class="footer-copy">© 2026 Kashi — The Eternal City. All rights reserved.</p>
-      <p class="footer-credit">by Twashta Labs</p>
+  <!-- ══════════════════════════════════ TABLE OF CONTENTS ══════════════════════════════════ -->
+  <section class="toc-section-outer" id="contents">
+    <div class="wrap">
+
+      <div class="toc-title-wrap reveal">
+        <div class="toc-version mono">पत्र</div>
+        <div class="toc-heading-row">
+          <h2 class="toc-heading">Contents.</h2>
+          <div class="toc-heading-rule"></div>
+        </div>
+      </div>
+
+      <div class="toc-grid reveal" id="toc-grid"></div>
+
     </div>
-    <div class="footer-col--right">
-      <nav class="footer-nav" aria-label="Footer navigation">
-        <a href="index.html">Home</a>
-        <a href="explore-kashi.html">Explore Kashi</a>
-        <a href="page2.html">Manikarnika</a>
-        <a href="about.html">About</a>
-        <a href="bio.html">Bio</a>
-      </nav>
-      <img class="footer-logo" src="loading_images/5_cropped.png" alt="Banarasi Bhaukal logo">
+  </section>
+
+  <!-- ══════════════════════════════════ FOOTER ══════════════════════════════════ -->
+  <!-- Same arrangement as every other page: crafted-line centred on top,
+       then copyright-left / nav-and-logo-right. -->
+  <footer class="site" id="site-footer">
+    <p class="foot-crafted">Crafted at Twashta Labs</p>
+    <div class="footer-main">
+      <div class="footer-col--left">
+        <p class="footer-copy">© 2026 Banarasi Bhaukal. All rights reserved.</p>
+      </div>
+      <div class="footer-col--right">
+        <nav class="footer-nav" aria-label="Footer navigation">
+          <a href="page2.html">Home</a>
+          <a href="explore-kashi.html">Explore Kashi</a>
+          <a href="index.html">Explore Ghats</a>
+          <a href="patra.html">Patra</a>
+          <a href="about.html">About</a>
+        </nav>
+        <img class="footer-logo" src="loading_images/5_cropped.png" alt="Banarasi Bhaukal logo">
+      </div>
     </div>
   </footer>
 
-  <script>
-    // Simple sequential-loader hide — same golden loader as the rest of the
-    // site, self-contained here since this page has no hero video to key off.
-    window.addEventListener('load', () => {
-      setTimeout(() => {
-        const loader = document.getElementById('loader');
-        if (!loader) return;
-        loader.style.transition = 'opacity 0.7s ease';
-        loader.style.opacity = '0';
-        setTimeout(() => { loader.style.display = 'none'; }, 750);
-      }, 900);
-    });
-  </script>
+</div><!-- /#app -->
 
+<script>
+/* ══════════════════════════════════════════════════════════════
+   PAGE LOAD — sequential logo preloader, same timing as the rest of the site
+════════════════════════════════════════════════════════════════ */
+(function () {
+  const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const loader = document.getElementById("loader");
+  const app = document.getElementById("app");
+
+  function reveal() {
+    loader.classList.add("hidden");
+    app.classList.add("revealed");
+    setTimeout(() => { loader.style.display = "none"; }, 600);
+  }
+
+  window.addEventListener("load", () => {
+    setTimeout(reveal, prefersReduced ? 0 : 1400);
+  });
+})();
+
+/* ══════════════════════════════════════════════════════════════
+   SCROLL REVEAL
+════════════════════════════════════════════════════════════════ */
+(function () {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add("visible"); observer.unobserve(e.target); }
+    });
+  }, { threshold: 0.08 });
+  document.querySelectorAll(".reveal").forEach(el => observer.observe(el));
+})();
+
+/* ══════════════════════════════════════════════════════════════
+   CONTENTS DATA — the objects, and the rest of the site
+════════════════════════════════════════════════════════════════ */
+const TOC = [
+  { title: "The Objects", chapters: [
+    { name: "Bel Patra — the three-leafed bael.", href: "#fig-bel-patra" },
+    { name: "Damroo — the hourglass drum.",       href: "#fig-damroo" },
+    { name: "Ganga Diya — the river's lamp.",      href: "#fig-diya" },
+    { name: "The river boat.",                     href: "#fig-boat" },
+  ]},
+  { title: "Elsewhere in Kashi", chapters: [
+    { name: "Explore Kashi — the 3D temple.", href: "explore-kashi.html" },
+    { name: "Home — the ghats, scrolling.",   href: "page2.html" },
+    { name: "Explore Ghats.",                 href: "index.html" },
+    { name: "About Banarasi Bhaukal.",        href: "about.html" },
+  ]},
+];
+
+/* Build Contents two-column grid */
+(function () {
+  const grid = document.getElementById("toc-grid");
+  TOC.forEach((section, si) => {
+    const group = document.createElement("div");
+    group.className = "toc-group";
+
+    const title = document.createElement("div");
+    title.className = "toc-group-title mono";
+    title.textContent = (si + 1) + ". " + section.title.toUpperCase();
+    group.appendChild(title);
+
+    const list = document.createElement("div");
+    list.className = "toc-chapters";
+
+    section.chapters.forEach(ch => {
+      const row = document.createElement("a");
+      row.href = ch.href;
+      row.className = "toc-chapter-row no-count";
+
+      const bullet = document.createElement("span");
+      bullet.className = "toc-chapter-bullet";
+      bullet.textContent = "•";
+      row.appendChild(bullet);
+
+      const name = document.createElement("span");
+      name.className = "toc-chapter-name";
+      name.textContent = ch.name;
+      row.appendChild(name);
+
+      const leader = document.createElement("span");
+      leader.className = "toc-leader";
+      row.appendChild(leader);
+
+      list.appendChild(row);
+    });
+
+    group.appendChild(list);
+    grid.appendChild(group);
+  });
+})();
+
+/* ══════════════════════════════════════════════════════════════
+   THEME TOGGLE — light (original) / dark (golden), persisted
+════════════════════════════════════════════════════════════════ */
+(function () {
+  const root  = document.documentElement;
+  const btn   = document.getElementById("theme-toggle");
+  const icon  = btn.querySelector(".theme-icon");
+  const label = document.getElementById("theme-toggle-label");
+
+  function apply(theme) {
+    if (theme === "dark") {
+      root.setAttribute("data-theme", "dark");
+      icon.textContent = "☾";
+      label.textContent = "Dark";
+      btn.setAttribute("aria-pressed", "true");
+    } else {
+      root.removeAttribute("data-theme");
+      icon.textContent = "☀︎";
+      label.textContent = "Light";
+      btn.setAttribute("aria-pressed", "false");
+    }
+  }
+
+  let saved = null;
+  try { saved = localStorage.getItem("patra-theme"); } catch (e) {}
+  apply(saved === "dark" ? "dark" : "light");
+
+  btn.addEventListener("click", () => {
+    const isDark = root.getAttribute("data-theme") === "dark";
+    const next = isDark ? "light" : "dark";
+    apply(next);
+    try { localStorage.setItem("patra-theme", next); } catch (e) {}
+  });
+})();
+</script>
+
+<!-- ── Shared mobile nav toggle (hamburger) ───────────────────────────── -->
+<script src="js/nav.js"></script>
 </body>
 </html>

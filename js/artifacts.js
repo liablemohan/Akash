@@ -192,8 +192,9 @@ export class ArtifactManager {
       // Y bobbing (continues even during carousel animation)
       item.group.position.y = Math.sin(elapsed * Math.PI + item.phaseOffset) * 0.055;
 
-      // Gentle self-spin so models don't look frozen
-      item.model.rotation.y += delta * 0.35;
+      // Gentle self-spin so models don't look frozen — clockwise, matching
+      // the aura ring and every other element revolving around the temple.
+      item.model.rotation.y -= delta * 0.35;
     });
   }
 
@@ -218,6 +219,11 @@ export class ArtifactManager {
       duration:       0.65,
       ease:           'power2.inOut',
       onComplete: () => {
+        // Fold back into [0, 2π) so the value can't drift arbitrarily large
+        // over a long session — purely a housekeeping step, the resulting
+        // angle is mathematically identical (mod 2π), so the front item
+        // this lands on is unaffected.
+        this._carouselAngle = ((this._carouselAngle % TWO_PI) + TWO_PI) % TWO_PI;
         this._isAnimating = false;
         this._highlightFront();
       },

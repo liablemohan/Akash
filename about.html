@@ -3,109 +3,328 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="About Kashi — Eternal City: an immersive heritage journey through Varanasi.">
-  <title>About — Kashi</title>
+  <meta name="description" content="About Banarasi Bhaukal — Akash Choudhary, the voice behind the page, sharing the temples, ghats, and soul of Kashi (Varanasi).">
+  <title>About — Banarasi Bhaukal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
 
   <style>
+    body {
+      font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    /* ── Layout: text column + prominent portrait column ─────────────── */
     .about-wrap {
       min-height: 100vh;
       display: flex;
-      flex-direction: column;
       align-items: center;
-      justify-content: center;
-      text-align: center;
-      gap: 1.5rem;
-      padding: 8rem 6vw 6rem;
     }
+
+    .about-layout {
+      width: 100%;
+      max-width: 1440px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+      align-items: center;
+      gap: 6vw;
+      padding: 15vh 6vw 9vh;
+    }
+
+    .about-text-col {
+      max-width: 58ch;
+      order: 1; /* text renders on the left even though the image comes first in the DOM */
+    }
+
     .about-eyebrow {
+      display: block;
       text-transform: uppercase;
-      font-size: 0.75rem;
-      letter-spacing: 0.35em;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.32em;
       color: var(--accent);
+      margin-bottom: 1.4rem;
     }
+
     .about-title {
-      font-size: clamp(2.4rem, 7vw, 4.5rem);
-      font-weight: 500;
-      line-height: 1.05;
+      font-family: 'Inter', sans-serif;
+      font-weight: 700;
+      font-size: clamp(2.2rem, 4.2vw, 3.4rem);
+      line-height: 1.08;
+      letter-spacing: -0.01em;
+      margin: 0 0 0.4rem;
     }
+
     .about-title .accent {
       color: var(--accent);
-      font-style: italic;
-      font-weight: 300;
+      font-weight: 800;
     }
-    .about-rule {
-      width: 48px;
-      height: 1px;
-      background: var(--accent);
-      opacity: 0.55;
-      margin: 0.5rem 0;
-    }
-    .about-copy {
-      max-width: 56ch;
-      font-size: 1.05rem;
-      line-height: 1.75;
-      color: rgba(243, 230, 207, 0.75);
-    }
-    .about-note {
-      margin-top: 1.5rem;
-      font-size: 0.72rem;
-      letter-spacing: 0.22em;
+
+    .about-subtitle {
+      font-weight: 500;
+      font-size: clamp(0.95rem, 1.3vw, 1.1rem);
+      letter-spacing: 0.16em;
       text-transform: uppercase;
-      color: rgba(244, 185, 66, 0.55);
+      color: rgba(244, 185, 66, 0.8);
+      margin: 0 0 2.4rem;
+    }
+
+    .about-copy {
+      font-weight: 400;
+      font-size: clamp(0.98rem, 1.15vw, 1.08rem);
+      line-height: 1.85;
+      color: rgba(243, 230, 207, 0.82);
+      margin: 0 0 1.35rem;
+    }
+
+    .about-copy:last-of-type { margin-bottom: 0; }
+
+    .about-copy .quoted { color: var(--accent); font-weight: 600; }
+
+    .about-rule {
+      width: 56px;
+      height: 2px;
+      background: var(--accent);
+      opacity: 0.7;
+      margin: 2.4rem 0 2rem;
+    }
+
+    /* ── Social icons ──────────────────────────────────────────────── */
+    .about-socials {
+      display: flex;
+      align-items: center;
+      gap: 1.1rem;
+      margin-top: 2.4rem;
+    }
+
+    .about-social-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 1px solid rgba(244, 185, 66, 0.35);
+      color: rgba(244, 185, 66, 0.85);
+      background: rgba(244, 185, 66, 0.05);
+      transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease, transform 0.2s ease;
+    }
+
+    .about-social-link svg { width: 19px; height: 19px; }
+
+    .about-social-link:hover,
+    .about-social-link:focus-visible {
+      transform: translateY(-2px);
+    }
+
+    /* Brand-colored hover per platform */
+    .about-social-link--instagram:hover,
+    .about-social-link--instagram:focus-visible {
+      background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+      border-color: transparent;
+      color: #fff;
+    }
+
+    .about-social-link--x:hover,
+    .about-social-link--x:focus-visible {
+      background: #000;
+      border-color: #000;
+      color: #fff;
+    }
+
+    .about-social-link--threads:hover,
+    .about-social-link--threads:focus-visible {
+      background: #000;
+      border-color: #000;
+      color: #fff;
+    }
+
+    /* ── Portrait image — the prominent visual anchor ─────────────────── */
+    .about-image-col {
+      position: relative;
+      order: 2; /* renders on the right, on desktop, despite being first in the DOM */
+    }
+
+    .about-image-col img {
+      /* Shrink to fit both the column width and the height cap while
+         keeping the image's own aspect ratio — the box always exactly
+         matches the rendered image, so nothing is ever cropped. */
+      display: block;
+      width: auto;
+      height: auto;
+      max-width: 100%;
+      max-height: 78vh;
+      margin: 0 auto;
+      border-radius: 20px;
+      box-shadow: 0 40px 90px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(244, 185, 66, 0.18);
+    }
+
+    @media (max-width: 1000px) {
+      .about-layout { grid-template-columns: 1fr; gap: 3rem; padding-top: 13vh; }
+      .about-image-col { order: -1; max-width: 420px; margin: 0 auto; }
+      .about-image-col img { max-height: 60vh; }
+      .about-text-col { max-width: none; }
+    }
+
+    /* ── Phone: sticky portrait stays on screen while the text scrolls
+       past/over it — the image never leaves the viewport until the
+       reader reaches the very end of the bio. ─────────────────────── */
+    @media (max-width: 700px) {
+      .about-wrap { display: block; min-height: 0; }
+
+      .about-layout {
+        display: block;
+        padding: 0;
+        max-width: none;
+      }
+
+      .about-image-col {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        height: 50vh;
+        margin: 0;
+        overflow: hidden;
+        /* A blurred, darkened copy of the same photo fills the band behind
+           it, so the letterboxed edges (needed to show the full portrait,
+           uncropped, in a landscape band) read as intentional rather than
+           empty space. */
+        background-image: linear-gradient(rgba(12, 8, 5, 0.55), rgba(12, 8, 5, 0.55)), url('assets/akash-bio-mono.png');
+        background-size: cover;
+        background-position: center 20%;
+      }
+
+      .about-image-col img {
+        width: 100%;
+        height: 100%;
+        max-width: none;
+        max-height: none;
+        object-fit: contain;
+        border-radius: 0;
+        box-shadow: none;
+        filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.5));
+      }
+
+      .about-image-col::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to bottom, rgba(12, 8, 5, 0) 55%, rgba(12, 8, 5, 0.96) 100%);
+        pointer-events: none;
+      }
+
+      .about-text-col {
+        position: relative;
+        z-index: 2;
+        max-width: none;
+        margin-top: -7vh;
+        background: var(--bg-color);
+        border-radius: 26px 26px 0 0;
+        padding: 2.75rem 7vw 5rem;
+      }
+
+      .about-title { font-size: clamp(1.6rem, 7vw, 2.3rem); }
+      .about-copy { font-size: 0.92rem; line-height: 1.75; }
+      .about-socials { margin-top: 2rem; }
     }
   </style>
 </head>
 <body>
 
   <!-- ── Page navigation (top right) ─────────────────────────────────── -->
+  <img id="site-logo" src="loading_images/5_cropped.png" alt="Banarasi Bhaukal">
+
   <nav id="page-nav" aria-label="Page navigation">
-    <img class="nav-logo" src="loading_images/5_cropped.png" alt="Banarasi Bhaukal">
-    <a href="index.html" class="page-nav-link">Home</a>
-    <span class="page-nav-sep">|</span>
-    <a href="explore-kashi.html" class="page-nav-link">Explore Kashi</a>
-    <span class="page-nav-sep">|</span>
-    <a href="page2.html" class="page-nav-link">Manikarnika</a>
-    <span class="page-nav-sep">|</span>
-    <a href="patra.html" class="page-nav-link">Patra</a>
-    <span class="page-nav-sep">|</span>
-    <span class="page-nav-link active" aria-current="page">About</span>
-    <span class="page-nav-sep">|</span>
-    <a href="bio.html" class="page-nav-link">Bio</a>
+    <button id="nav-toggle" class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="page-nav-links">
+      <a href="page2.html" class="page-nav-link">Home</a>
+      <span class="page-nav-sep">|</span>
+      <a href="explore-kashi.html" class="page-nav-link">Explore Kashi</a>
+      <span class="page-nav-sep">|</span>
+      <a href="index.html" class="page-nav-link">Explore Ghats</a>
+      <span class="page-nav-sep">|</span>
+      <a href="patra.html" class="page-nav-link">Patra</a>
+      <span class="page-nav-sep">|</span>
+      <span class="page-nav-link active" aria-current="page">About</span>
+    </div>
   </nav>
 
   <main class="about-wrap">
-    <span class="about-eyebrow">Est. before time itself</span>
-    <h1 class="about-title">About <span class="accent">Kashi</span></h1>
-    <div class="about-rule"></div>
-    <p class="about-copy">
-      This page is a placeholder for now. The story of this project —
-      why Kashi, what "Explore Kashi" and "Patra" mean here, and who
-      built this heritage journey — will live on this page soon.
-    </p>
-    <p class="about-note">More coming soon</p>
+    <div class="about-layout">
+
+      <!-- Image comes first in the DOM so it can sit sticky-pinned at the
+           top on phone while the text scrolls after it; `order` below
+           keeps it visually on the right on desktop. -->
+      <div class="about-image-col">
+        <img src="assets/akash-bio-mono.png" alt="Akash Choudhary, the voice behind Banarasi Bhaukal">
+      </div>
+
+      <div class="about-text-col">
+        <span class="about-eyebrow">The voice behind the page</span>
+        <h1 class="about-title">About <span class="accent">Banarasi Bhaukal</span></h1>
+        <p class="about-subtitle">Akash Choudhary</p>
+
+        <p class="about-copy">I'm the voice behind Banarasi Bhaukal.</p>
+        <p class="about-copy">A page born from pure love for Kashi — one of the oldest living cities in the world.</p>
+        <p class="about-copy">Through photos, reels, and stories, I share the temples, the ghats, the chai stalls, the chaos, and the calm.</p>
+        <p class="about-copy">This is Banaras: devotion and swagger, walking side by side.</p>
+        <p class="about-copy"><span class="quoted">"Bhaukal"</span> isn't just a word here. It's an attitude.</p>
+        <p class="about-copy">The quiet confidence of a city that never needs to prove itself.</p>
+        <p class="about-copy">My content is a tribute to that energy — Mahadev's blessings, sunrise on the ghats, and the everyday moments outsiders rarely see.</p>
+        <p class="about-copy">हर हर महादेव 🙏🏼</p>
+
+        <div class="about-rule"></div>
+
+        <div class="about-socials" aria-label="Follow Banarasi Bhaukal">
+          <a class="about-social-link about-social-link--instagram" href="https://www.instagram.com/banarasi_bhaukal/" target="_blank" rel="noopener" aria-label="Instagram">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="5.5"/>
+              <circle cx="12" cy="12" r="4.2"/>
+              <circle cx="17.35" cy="6.65" r="1.05" fill="currentColor" stroke="none"/>
+            </svg>
+          </a>
+          <a class="about-social-link about-social-link--x" href="https://x.com/banarasi_bhaukal" target="_blank" rel="noopener" aria-label="X (Twitter)">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M18.244 2H21l-6.53 7.47L22 22h-6.828l-5.35-6.98L3.64 22H1l7.02-8.03L2 2h6.914l4.842 6.41L18.244 2Zm-1.197 18h1.833L7.03 3.89H5.06L17.047 20Z"/>
+            </svg>
+          </a>
+          <a class="about-social-link about-social-link--threads" href="https://www.threads.com/@banarasi_bhaukal" target="_blank" rel="noopener" aria-label="Threads">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12.186 24h-.007c-3.581-.024-6.334-1.205-8.184-3.509C2.35 18.44 1.5 15.586 1.472 12.01v-.021c.028-3.573.877-6.428 2.523-8.482C5.845 1.205 8.598.024 12.179 0h.007c2.75.019 5.045.643 6.826 1.855 1.671 1.137 2.867 2.749 3.556 4.793l-2.16.732c-1.11-3.288-3.499-4.984-7.234-5.187-2.879.156-5.062 1.093-6.517 2.804-1.372 1.613-2.078 3.937-2.1 6.912.022 2.975.728 5.298 2.1 6.911 1.457 1.71 3.64 2.649 6.517 2.805 2.578-.14 4.35-.82 5.586-2.15 1.416-1.522 1.4-3.36 1.03-4.487-.219-.665-.612-1.211-1.146-1.622-.144 1.005-.469 1.848-.977 2.53-.699.94-1.712 1.487-3.01 1.63-1.192.132-2.34-.056-3.243-.53-1.058-.555-1.681-1.474-1.756-2.588-.075-1.1.372-2.108 1.258-2.844.83-.688 1.98-1.11 3.323-1.221.888-.073 1.712-.033 2.454.117-.108-.635-.334-1.14-.674-1.507-.44-.475-1.126-.717-2.038-.719h-.03c-.788 0-1.822.219-2.492 1.234l-1.842-1.257c.895-1.35 2.372-2.094 4.34-2.096h.03c1.586.003 2.86.478 3.685 1.373.751.816 1.192 1.986 1.312 3.48.096.055.19.11.283.169 1.075.674 1.855 1.622 2.256 2.756.556 1.573.607 4.133-1.507 6.375-1.632 1.729-3.92 2.628-6.79 2.712Z"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+
+    </div>
   </main>
 
   <!-- ── Footer ───────────────────────────────────────────────────────── -->
   <footer id="site-footer">
-    <div class="footer-col--left">
-      <p class="footer-copy">© 2026 Kashi — The Eternal City. All rights reserved.</p>
-      <p class="footer-credit">by Twashta Labs</p>
-    </div>
-    <div class="footer-col--right">
-      <nav class="footer-nav" aria-label="Footer navigation">
-        <a href="index.html">Home</a>
-        <a href="explore-kashi.html">Explore Kashi</a>
-        <a href="page2.html">Manikarnika</a>
-        <a href="patra.html">Patra</a>
-        <a href="bio.html">Bio</a>
-      </nav>
-      <img class="footer-logo" src="loading_images/5_cropped.png" alt="Banarasi Bhaukal logo">
+    <p class="foot-crafted">Crafted at Twashta Labs</p>
+    <div class="footer-main">
+      <div class="footer-col--left">
+        <p class="footer-copy">© 2026 Banarasi Bhaukal. All rights reserved.</p>
+      </div>
+      <div class="footer-col--right">
+        <nav class="footer-nav" aria-label="Footer navigation">
+          <a href="page2.html">Home</a>
+          <a href="explore-kashi.html">Explore Kashi</a>
+          <a href="index.html">Explore Ghats</a>
+          <a href="patra.html">Patra</a>
+          <a href="about.html">About</a>
+        </nav>
+        <img class="footer-logo" src="loading_images/5_cropped.png" alt="Banarasi Bhaukal logo">
+      </div>
     </div>
   </footer>
+
+  <!-- ── Shared mobile nav toggle (hamburger) ───────────────────────────── -->
+  <script src="js/nav.js"></script>
 
 </body>
 </html>

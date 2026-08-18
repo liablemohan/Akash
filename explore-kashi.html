@@ -23,19 +23,23 @@
 <body>
 
   <!-- ── Page navigation (top right) ─────────────────────────────────── -->
+  <img id="site-logo" src="loading_images/5_cropped.png" alt="Banarasi Bhaukal">
+
   <nav id="page-nav" aria-label="Page navigation">
-    <img class="nav-logo" src="loading_images/5_cropped.png" alt="Banarasi Bhaukal">
-    <a href="index.html" class="page-nav-link">Home</a>
-    <span class="page-nav-sep">|</span>
-    <span class="page-nav-link active" aria-current="page">Explore Kashi</span>
-    <span class="page-nav-sep">|</span>
-    <a href="page2.html" class="page-nav-link">Manikarnika</a>
-    <span class="page-nav-sep">|</span>
-    <a href="patra.html" class="page-nav-link">Patra</a>
-    <span class="page-nav-sep">|</span>
-    <a href="about.html" class="page-nav-link">About</a>
-    <span class="page-nav-sep">|</span>
-    <a href="bio.html" class="page-nav-link">Bio</a>
+    <button id="nav-toggle" class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="page-nav-links">
+      <a href="page2.html" class="page-nav-link">Home</a>
+      <span class="page-nav-sep">|</span>
+      <span class="page-nav-link active" aria-current="page">Explore Kashi</span>
+      <span class="page-nav-sep">|</span>
+      <a href="index.html" class="page-nav-link">Explore Ghats</a>
+      <span class="page-nav-sep">|</span>
+      <a href="patra.html" class="page-nav-link">Patra</a>
+      <span class="page-nav-sep">|</span>
+      <a href="about.html" class="page-nav-link">About</a>
+    </div>
   </nav>
 
   <!-- ── Preloader: sequential logo reveal + golden loading bar ─────────── -->
@@ -164,6 +168,13 @@
         <div class="panel-articles" id="panel-articles" aria-label="Related content">
           <!-- Injected by JS per artifact -->
         </div>
+
+        <!-- "See it in Patra" deep link — shown only when this artifact
+             has a corresponding entry in patra.html; toggled by scene.js -->
+        <a id="panel-patra-link" class="panel-patra-link" href="patra.html" style="display:none">
+          <span class="panel-patra-link-label">Read its story in Patra</span>
+          <span class="panel-patra-link-arrow" aria-hidden="true">→</span>
+        </a>
       </aside>
 
       <!-- ── Focused state: right object label (PRD §10) ───────────────── -->
@@ -178,6 +189,9 @@
   <!-- ── GSAP (global, for main.js + scene.js) ─────────────────────────── -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+  <!-- ── Shared mobile nav toggle (hamburger) ───────────────────────────── -->
+  <script src="js/nav.js"></script>
 
   <!-- ── Hero animations (preloader, scroll parallax, mouse tilt) ──────── -->
   <script src="js/main.js"></script>
