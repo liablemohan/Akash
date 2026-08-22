@@ -1,7 +1,7 @@
 /**
  * artifacts.js — ArtifactManager  (v3 — Carousel Mode)
  *
- * Five sacred objects sit in a fixed circle.  After their spawn animation
+ * Four sacred objects sit in a fixed circle.  After their spawn animation
  * completes, auto-orbit STOPS.  The user navigates with ← / → arrows.
  * Only the "front" item (closest to the camera, at angle = π/2) is
  * interactive (hover cursor + click-to-open modal).
@@ -201,43 +201,52 @@ export class ArtifactManager {
   // ── Carousel navigation ────────────────────────────────────────────────────
 
   /**
-   * Rotate the carousel one step in the given direction.
-   * 'left'  → next counter-clockwise item comes to front  (angle -=  step)
-   * 'right' → next clockwise item comes to front           (angle +=  step)
+   * The camera's current azimuth, expressed in the same (x,z)→angle
+   * convention as item positions (x = cos(a)·r, z = sin(a)·r), so it can be
+   * compared directly against item angles. Read live off the camera every
+   * call — after a mouse/touch drag-orbit this reflects wherever the user
+   * has actually rotated the view to, not the scene's original fixed angle.
+   */
+  _cameraAngle() {
+    const p = this.camera.position;
+    return Math.atan2(p.z, p.x);
+  }
+
+  /**
+   * Rotate the carousel one step in the given direction, landing the next
+   * item at the camera's CURRENT azimuth — not a fixed angle. If the user
+   * has drag-orbited the camera elsewhere first, the arrow still brings the
+   * intended neighbour cleanly into view instead of stepping by a rigid
+   * 90° that may no longer line up with where the camera is looking.
+   * 'left'  → previous item in the defs order comes to front
+   * 'right' → next item in the defs order comes to front
    */
   rotateCarousel(dir) {
     if (this._isAnimating) return;
-    this._isAnimating = true;
+    const front = this.getFrontItem();
+    if (!front) return;
 
-    const step        = TWO_PI / this.items.length;   // 72° for 5 items
-    const sign        = dir === 'right' ? 1 : -1;
-    const targetAngle = this._carouselAngle + sign * step;
+    const idx  = this.items.indexOf(front);
+    const step = dir === 'right' ? 1 : -1;
+    const next = this.items[(idx + step + this.items.length) % this.items.length];
 
-    // GSAP animates the scalar offset; update() reads it each frame for XZ
-    window.gsap.to(this, {
-      _carouselAngle: targetAngle,
-      duration:       0.65,
-      ease:           'power2.inOut',
-      onComplete: () => {
-        // Fold back into [0, 2π) so the value can't drift arbitrarily large
-        // over a long session — purely a housekeeping step, the resulting
-        // angle is mathematically identical (mod 2π), so the front item
-        // this lands on is unaffected.
-        this._carouselAngle = ((this._carouselAngle % TWO_PI) + TWO_PI) % TWO_PI;
-        this._isAnimating = false;
-        this._highlightFront();
-      },
-    });
+    this._rotateToWorldAngle(next, this._cameraAngle());
   }
 
   // ── Front item helpers ─────────────────────────────────────────────────────
 
-  /** The item with the largest Z value (sin of its effective angle) = front. */
+  /**
+   * The item currently closest (shortest angular distance) to the camera's
+   * live azimuth — i.e. whichever artifact the camera is actually facing
+   * right now, even mid-drag or after the user has manually orbited around.
+   */
   getFrontItem() {
-    let best = null, bestZ = -Infinity;
+    const camAngle = this._cameraAngle();
+    let best = null, bestDist = Infinity;
     this.items.forEach(item => {
-      const z = Math.sin(item.baseAngle + this._carouselAngle);
-      if (z > bestZ) { bestZ = z; best = item; }
+      const a = item.baseAngle + this._carouselAngle;
+      const d = Math.abs(((a - camAngle + Math.PI) % TWO_PI + TWO_PI) % TWO_PI - Math.PI);
+      if (d < bestDist) { bestDist = d; best = item; }
     });
     return best;
   }
@@ -319,25 +328,34 @@ export class ArtifactManager {
 
   /**
    * Rotate the carousel directly (shortest angular path) so that `item`
-   * lands at FRONT_ANGLE. Resolves once the animation completes — or
-   * immediately if the item is already front, or if a rotation is already
-   * in progress (caller should avoid double-triggering via _isAnimating).
+   * lands at the camera's CURRENT azimuth, wherever the user has drag-
+   * orbited it to. Resolves once the animation completes — or immediately
+   * if the item is already front, or if a rotation is already in progress
+   * (caller should avoid double-triggering via _isAnimating).
    */
   rotateToItem(item) {
+    if (!item || this.isFrontItem(item)) return Promise.resolve();
+    return this._rotateToWorldAngle(item, this._cameraAngle());
+  }
+
+  /**
+   * Shared rotation core: animates `_carouselAngle` (shortest angular path)
+   * so that `item`'s effective angle lands exactly on `targetAngle`.
+   */
+  _rotateToWorldAngle(item, targetAngle) {
     return new Promise(resolve => {
-      if (!item || this.isFrontItem(item)) { resolve(); return; }
       if (this._isAnimating) { resolve(); return; }
       this._isAnimating = true;
 
       const current = this._carouselAngle;
-      let delta = (FRONT_ANGLE - item.baseAngle) - current;
+      let delta = (targetAngle - item.baseAngle) - current;
       // Normalise to shortest path in [-π, π]
       delta = ((delta % TWO_PI) + TWO_PI) % TWO_PI;
       if (delta > Math.PI) delta -= TWO_PI;
-      const targetAngle = current + delta;
+      const newAngle = current + delta;
 
       if (this.PRM) {
-        this._carouselAngle = targetAngle;
+        this._carouselAngle = newAngle;
         this._isAnimating = false;
         this._highlightFront();
         resolve();
@@ -345,7 +363,7 @@ export class ArtifactManager {
       }
 
       window.gsap.to(this, {
-        _carouselAngle: targetAngle,
+        _carouselAngle: newAngle,
         duration:       0.65,
         ease:           'power2.inOut',
         onComplete: () => {

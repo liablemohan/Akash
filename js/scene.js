@@ -9,6 +9,7 @@
 import * as THREE                from 'three';
 import { GLTFLoader }            from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader }           from 'three/addons/loaders/DRACOLoader.js';
+import { RoomEnvironment }       from 'three/addons/environments/RoomEnvironment.js';
 import { ArtifactManager }       from './artifacts.js';
 
 // ─── Design constants (PRD §4) ─────────────────────────────────────────────
@@ -23,16 +24,18 @@ const ARTIFACT_DEFS = [
     icon: '🍃',
     category: 'Spiritual Layer',
     path: 'assets/bel_patta.glb',
-    patraLink: 'patra.html#fig-bel-patra',
+    patraLink: 'patra.html#article-ramleela',
+    patraTitle: 'Ramleela',
+    patraImage: 'Ramleela.png',
+    patraExcerpt:
+      'Experience Ramnagar\'s Ramlila, a remarkable 31-day journey through the ' +
+      'Ramayana, where the banks of the Ganges transform into living landscapes ' +
+      'of Ayodhya, Lanka, Panchavati, and beyond — bringing epic storytelling, ' +
+      'tradition, music, and devotion vividly to life.',
     story:
       'The sacred three-leafed bael (Aegle marmelos) is the most beloved ' +
       'offering to Lord Shiva. Kashi\'s faithful carry garlands of bel leaves ' +
       'to Kashi Vishwanath every dawn — a ritual unbroken since antiquity.',
-    articles: [
-      { title: 'Aegle Marmelos in Vedic Tradition', desc: 'How the bael tree became the preferred offering to Shiva — and why its three leaves represent the Trimurti.' },
-      { title: 'Dawn Rituals at Vishwanath', desc: 'The pre-sunrise procession of devotees bearing bel garlands through Vishwanath Gali, unchanged for centuries.' },
-      { title: 'Medicinal Heritage of Bael', desc: 'Ayurvedic uses documented in ancient Kashi texts — from digestive remedies to fever treatments still practised today.' },
-    ],
   },
   {
     id: 'kamandal',
@@ -41,15 +44,18 @@ const ARTIFACT_DEFS = [
     category: 'IKS Knowledge',
     path: 'assets/kamandal.glb',
     rotationFix: { x: -Math.PI / 2, y: 0, z: 0 },
+    patraLink: 'patra.html#article-how-to-reach',
+    patraTitle: 'How to Reach Varanasi',
+    patraImage: 'HTRV.png',
+    patraExcerpt:
+      'Discover the many paths to Kashi — from air and rail to road and bus. ' +
+      'This guide helps you navigate your journey to one of the world\'s oldest ' +
+      'living cities, where every arrival opens the way to its timeless culture ' +
+      'and spiritual essence.',
     story:
       'The sage\'s water vessel holds Ganga jal drawn from Manikarnika Ghat at ' +
       'first light — water said to carry twelve centuries of sankalpa within ' +
       'its silent, amber-lit current.',
-    articles: [
-      { title: 'Ganga Jal: Sacred Science', desc: 'Modern microbiology meets ancient knowledge — why Ganga water from Varanasi retains purity properties other river water does not.' },
-      { title: 'The Kashi Kalpa', desc: 'The renunciate tradition of collecting Ganga water at Manikarnika and distributing it across the subcontinent.' },
-      { title: 'Copper Vessels in Vedic Practice', desc: 'The metallurgical wisdom behind using copper kamandalas and the antimicrobial properties now confirmed by science.' },
-    ],
   },
   {
     id: 'damroo',
@@ -57,16 +63,18 @@ const ARTIFACT_DEFS = [
     icon: '🥁',
     category: 'Cultural Knowledge',
     path: 'assets/damroo.glb',
-    patraLink: 'patra.html#fig-damroo',
+    patraLink: 'patra.html#article-malaiyo',
+    patraTitle: 'Malaiyo',
+    patraImage: 'Malaiyo.png',
+    patraExcerpt:
+      'Discover Malaiyo, Varanasi\'s ethereal winter delicacy — an airy, ' +
+      'hand-churned creation shaped by dew, milk, saffron, and tradition. ' +
+      'Available only in the cooler months, this delicate sweet offers a ' +
+      'taste of the city\'s culinary heritage and seasonal charm.',
     story:
       'Shiva\'s hourglass drum whose first beat split cosmic silence into the ' +
       'fourteen foundational Sanskrit syllables — language itself born from rhythm, ' +
       'still reverberating through the lanes of Kashi.',
-    articles: [
-      { title: 'Maheshvara Sutras: Birth of Sanskrit', desc: 'The fourteen sounds produced by Shiva\'s damroo — how Panini extracted them to form the phonological basis of Sanskrit grammar.' },
-      { title: 'Nada Brahma: Sound as Divinity', desc: 'The philosophy that the universe is fundamentally vibrational — explored in Kashi\'s classical music lineages.' },
-      { title: 'The Benares Gharana', desc: 'How the tabla and pakhawaj traditions of Varanasi connect to the cosmic percussion of Shiva\'s dance in Kashi.' },
-    ],
   },
   {
     id: 'diya',
@@ -74,16 +82,18 @@ const ARTIFACT_DEFS = [
     icon: '🪔',
     category: 'Cultural Knowledge',
     path: 'assets/diya.glb',
-    patraLink: 'patra.html#fig-diya',
+    patraLink: 'patra.html#article-women-safety',
+    patraTitle: 'Women Safety',
+    patraImage: 'WSV.png',
+    patraExcerpt:
+      'Explore Varanasi through the experiences of solo women travellers who ' +
+      'navigate its vibrant lanes, sacred ghats, and cultural traditions with ' +
+      'curiosity and resilience. Discover practical insights on safety, local ' +
+      'hospitality, and travelling through Kashi with confidence.',
     story:
       'Each evening at Dashaswamedh Ghat, hundreds of earthen diyas float upon ' +
       'the Ganga in the grand Aarti — each flame a prayer carried by water, ' +
       'ascending toward the infinite through fire and current.',
-    articles: [
-      { title: 'Ganga Aarti: Living Liturgy', desc: 'The choreography of Dashaswamedh Aarti — seven priests, 21 lamps, and a ritual unchanged across living memory in Kashi.' },
-      { title: 'Earthen Diyas and Folk Craft', desc: 'The Kumhar potters of Varanasi who produce thousands of clay diyas by hand each festival season — an unbroken craft tradition.' },
-      { title: 'Fire as Cosmic Element in Kashi', desc: 'From the eternal flame at Manikarnika to the Aarti fires at the ghats — why Agni, fire, is uniquely central to Kashi\'s identity.' },
-    ],
   },
 ];
 
@@ -128,6 +138,7 @@ class KashiScene {
     if (!this._webGLAvailable()) return;
 
     this._setupRenderer();
+    this._setupEnvironment();
     this._setupCamera();
     this._setupLights();
     this._addSceneBackground();
@@ -240,6 +251,19 @@ class KashiScene {
     this.renderer.setClearColor(0xE3A34E, 1);
   }
 
+  // ── Environment (IBL) ────────────────────────────────────────────────────
+  // A synthetic studio environment (no HDR file needed) so every metallic
+  // gold material — temple accents, the artifact carousel, the aura leaves —
+  // has something real to reflect. Without this, metalness only darkens
+  // unlit areas and the gold reads as flat, matte yellow instead of metal.
+  _setupEnvironment() {
+    const pmrem = new THREE.PMREMGenerator(this.renderer);
+    pmrem.compileEquirectangularShader();
+    const envRT = pmrem.fromScene(new RoomEnvironment(), 0.035);
+    this.scene.environment = envRT.texture;
+    pmrem.dispose();
+  }
+
   // ── Camera ───────────────────────────────────────────────────────────────
   _setupCamera() {
     this.camera = new THREE.PerspectiveCamera(
@@ -265,13 +289,14 @@ class KashiScene {
 
   // ── Lights ───────────────────────────────────────────────────────────────
   _setupLights() {
-    // Soft neutral ambient — lets the model's own material colors read through
-    // instead of being washed in a single warm tint
-    this.scene.add(new THREE.AmbientLight(0xffffff, 0.35));
+    // Soft neutral ambient — raised slightly so shaded crevices (arches,
+    // carved recesses) never drop to pure black; still low enough that
+    // directional lights carry the actual shape and depth.
+    this.scene.add(new THREE.AmbientLight(0xffffff, 0.48));
 
     // Hemisphere light (cool sky / warm ground) adds gentle color variation
     // and depth without dominating the model with one hue
-    const hemi = new THREE.HemisphereLight(0xf4f6fb, 0x3a2f1a, 0.5);
+    const hemi = new THREE.HemisphereLight(0xf4f6fb, 0x3a2f1a, 0.55);
     this.scene.add(hemi);
 
     // Key directional — neutral daylight white, brighter for clearer definition
@@ -281,9 +306,10 @@ class KashiScene {
 
     // Front light — positioned near the camera's line of sight so the face
     // of the model the viewer actually sees is well lit, not just its top/sides.
-    // Boosted intensity + a soft second front source for fuller, flatter-shadow
-    // frontal coverage of the temple face.
-    const front = new THREE.DirectionalLight(0xffffff, 2.2);
+    // Dialed back from its previous 2.2 — with the ambient/hemi floor raised
+    // and the environment map now feeding specular highlights, that value
+    // was clipping the front facade to a flat white wash under ACES tonemap.
+    const front = new THREE.DirectionalLight(0xffffff, 1.75);
     front.position.set(0, 1.6, 6);
     this.scene.add(front);
 
@@ -669,26 +695,24 @@ class KashiScene {
 
     // 2. Equatorial halo — ring of small bel patra leaf clusters
     const count = 90;
-    const r     = this._normScale * 1.18;
+    const r     = this._normScale * 1.05;
     const baseY = this.temple ? this.temple.position.y : 0;
 
+    // Solid metallic gold — same recipe as the carousel artifacts, so the
+    // orbiting leaves read as real gold catching the scene's environment
+    // reflections rather than a flat, semi-transparent yellow decal. A
+    // small emissive keeps them glowing accents even in shadow.
     const leafMat = new THREE.MeshStandardMaterial({
       color:             GOLD,
       emissive:          new THREE.Color(GOLD),
-      // Emissive dominant, metalness/roughness low — the leaves need to
-      // read as an unambiguous, saturated gold under the 360° light rig
-      // rather than picking up washed-out white specular highlights from
-      // the directional lights surrounding the model.
-      emissiveIntensity: 1.35,
-      metalness:         0.22,
-      roughness:         0.48,
-      transparent:       true,
-      opacity:           0,
-      depthWrite:        false,
+      emissiveIntensity: 0.35,
+      metalness:         0.85,
+      roughness:         0.28,
       side:              THREE.DoubleSide,
     });
 
     const ring = new THREE.Group();
+    ring.scale.setScalar(0); // pops in via scale, not opacity — stays solid
     this._auraRing = ring;
     this.scene.add(this._auraRing);
 
@@ -697,7 +721,15 @@ class KashiScene {
       gltf => {
         const template = gltf.scene;
         template.traverse(child => {
-          if (child.isMesh) child.material = leafMat;
+          if (child.isMesh) {
+            child.material = leafMat;
+            // At this material's high metalness, a bad/inverted normal on
+            // the source mesh renders that face near-black instead of
+            // catching light — recompute normals from the geometry itself
+            // so every face lights correctly regardless of what the GLB
+            // shipped with.
+            child.geometry.computeVertexNormals();
+          }
         });
 
         // Normalise a single leaf cluster to a small, consistent size.
@@ -724,14 +756,18 @@ class KashiScene {
           ring.add(leaf);
         }
 
-        // Fade halo in
-        gsap.to(leafMat, { opacity: 0.97, duration: 0.9, ease: 'power2.out', delay: 0.2 });
+        // Pop the halo in (scale, not opacity — the leaves stay fully solid)
+        if (this.PRM) {
+          ring.scale.setScalar(1);
+        } else {
+          gsap.to(ring.scale, { x: 1, y: 1, z: 1, duration: 0.9, ease: 'power2.out', delay: 0.2 });
+        }
 
-        // Gentle pulse on halo opacity too — shallower dip so the gold
-        // stays clearly visible even at the low end of the pulse.
+        // Gentle glow pulse via emissive brightness — a "living" shimmer
+        // without ever making the metal look translucent.
         if (!this.PRM) {
           gsap.to(leafMat, {
-            opacity:  0.72,
+            emissiveIntensity: 0.45,
             duration: 2.5,
             ease:     'sine.inOut',
             yoyo:     true,
@@ -797,14 +833,17 @@ class KashiScene {
     document.getElementById('panel-story').textContent    = data.story;
     document.getElementById('object-label').textContent   = data.name;
 
-    // Build article cards
+    // Build the article card — just the Patra field-note excerpt (image +
+    // headline + text + Read More). No generic filler list anymore.
     const articlesEl = document.getElementById('panel-articles');
-    articlesEl.innerHTML = (data.articles || []).map(a => `
-      <article class="article-card">
-        <h3 class="article-title">${a.title}</h3>
-        <p  class="article-desc">${a.desc}</p>
-      </article>
-    `).join('');
+    articlesEl.innerHTML = (data.patraExcerpt && data.patraImage) ? `
+      <a class="article-card article-card--featured" href="${data.patraLink}">
+        <img class="article-card-img" src="${data.patraImage}" alt="${data.patraTitle || data.name}" loading="lazy">
+        <h3 class="article-title">${data.patraTitle || data.name}</h3>
+        <p  class="article-desc">${data.patraExcerpt}</p>
+        <span class="article-readmore">Read More <span aria-hidden="true">→</span></span>
+      </a>
+    ` : '';
 
     // ─ 1b. "See it in Patra" deep link, when this artifact has one ─────────
     const patraLinkEl = document.getElementById('panel-patra-link');

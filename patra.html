@@ -76,38 +76,54 @@ html[data-theme="dark"] {
 html { transition: background-color .35s ease; }
 body { transition: background-color .35s ease, color .35s ease; }
 
-/* ── Theme toggle switch ── */
+/* ── Top-right cluster: theme toggle (its own pill, separate from the
+   navbar) plus the site logo — grouped so both always sit together. ── */
+#top-controls {
+  position: fixed;
+  top: 18px; right: 24px;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* ── Theme toggle: a standalone pill holding both sun + moon glyphs,
+   sized up to be unmistakable at a glance — the active one is
+   highlighted, on laptop and phone alike. ── */
 #theme-toggle {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 12px;
   cursor: pointer;
-  background: var(--blue-soft);
-  border: 1px solid var(--rule);
+  background: var(--surface);
+  border: 1.5px solid var(--rule);
   border-radius: 100px;
-  padding: 6px 12px;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  color: var(--muted);
-  transition: background .25s ease, border-color .25s ease, color .25s ease;
+  padding: 12px 18px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  transition: background .35s ease, border-color .35s ease;
 }
-#theme-toggle:hover { color: var(--blue); border-color: var(--blue); }
-#theme-toggle .theme-icon { font-size: 12px; line-height: 1; }
+#theme-toggle:hover { border-color: var(--blue); }
+#theme-toggle .theme-icon {
+  font-size: 21px;
+  line-height: 1;
+  color: var(--blue);
+  opacity: .3;
+  transition: opacity .25s ease, transform .25s ease;
+}
+#theme-toggle .theme-icon.active { opacity: 1; transform: scale(1.25); }
 
-/* ── Site logo (top right, standalone) — tokens follow the theme ── */
+/* ── Site logo — tokens follow the theme ── */
 #site-logo {
-  position: fixed;
-  top: 20px; right: 24px;
-  z-index: 999;
-  height: 30px;
+  height: 75px;
   width: auto;
   display: block;
   border-radius: 6px;
 }
 @media (max-width: 900px) {
-  #site-logo { top: 12px; right: 12px; height: 24px; }
+  #top-controls { top: 12px; right: 12px; gap: 10px; }
+  #site-logo { height: 45px; }
+  #theme-toggle { padding: 9px 14px; gap: 9px; }
+  #theme-toggle .theme-icon { font-size: 16px; }
 }
 
 /* ── Patra page navigation (top left) — tokens follow the theme ── */
@@ -150,39 +166,51 @@ body { transition: background-color .35s ease, color .35s ease; }
 /* ── Mobile hamburger toggle ("tripundra" 3-line icon) ─── */
 .nav-toggle {
   display: none;
-  flex-direction: column;
-  justify-content: center;
   align-items: center;
-  gap: 4px;
-  width: 22px;
-  height: 22px;
+  justify-content: center;
+  width: 26px;
+  height: 18px;
   background: none;
   border: none;
   padding: 0;
-  margin-right: 2px;
   cursor: pointer;
 }
-.nav-toggle span {
+.nav-toggle-icon {
   display: block;
-  width: 17px;
-  height: 2px;
-  border-radius: 2px;
-  background: var(--blue);
-  transition: transform .3s ease, opacity .25s ease;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: transform .3s ease;
 }
-.nav-toggle[aria-expanded="true"] span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
-.nav-toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
-.nav-toggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+.nav-toggle[aria-expanded="true"] .nav-toggle-icon { transform: rotate(90deg); }
 .page-nav-links { display: contents; }
 @media (max-width: 900px) {
   .nav-toggle { display: flex; }
-  #page-nav { align-items: center; }
+  /* Collapsed = a plain circle around just the hamburger; opening
+     restores the familiar pill shape and padding. */
+  #page-nav {
+    align-items: center;
+    justify-content: center;
+    flex-wrap: nowrap;
+    gap: 0;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border-radius: 50%;
+  }
+  #page-nav.nav-open {
+    width: auto;
+    height: auto;
+    padding: 6px 12px;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
   .page-nav-links {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: 11px;
-    width: 100%;
+    width: 0;
     max-height: 0;
     overflow: hidden;
     opacity: 0;
@@ -190,7 +218,8 @@ body { transition: background-color .35s ease, color .35s ease; }
     transition: max-height .35s ease, opacity .3s ease, margin-top .35s ease;
   }
   .page-nav-links.open {
-    max-height: 60vh;
+    width: 100%;
+    max-height: 320px;
     opacity: 1;
     pointer-events: auto;
     margin-top: 9px;
@@ -735,6 +764,171 @@ header.site .wrap {
 }
 
 /* ══════════════════════════════════════════════════════════════
+   10B. ARTICLES — longer field notes on Kashi, each a full
+   structured article further down the page (see 10C).
+════════════════════════════════════════════════════════════════ */
+.articles-section { padding: var(--sp-7) 0; }
+.articles-header { max-width: 640px; margin-bottom: var(--sp-5); }
+.articles-heading {
+  font-family: var(--font-serif);
+  font-size: clamp(1.6rem, 2.6vw, 2.2rem);
+  font-weight: 400;
+  margin: var(--sp-2) 0;
+}
+.articles-sub {
+  font-family: var(--font-serif);
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+.articles-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sp-4);
+}
+.article-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 0 var(--sp-4);
+  text-decoration: none;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  overflow: hidden;
+  transition: border-color .25s ease, transform .25s ease, box-shadow .25s ease;
+}
+.article-card:hover, .article-card:focus-visible {
+  border-color: var(--blue);
+  transform: translateY(-3px);
+  box-shadow: 0 14px 30px rgba(0,0,0,0.08);
+}
+.article-card-thumb {
+  width: 100%;
+  height: 170px;
+  object-fit: cover;
+}
+.article-card .article-kicker,
+.article-card .article-title,
+.article-card .article-desc,
+.article-card .article-link { margin-left: var(--sp-4); margin-right: var(--sp-4); }
+.article-kicker {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--blue);
+}
+.article-title {
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.3;
+  margin: 0;
+}
+.article-desc {
+  font-family: var(--font-serif);
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+.article-link {
+  margin-top: auto;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.article-card:hover .article-link,
+.article-card:focus-visible .article-link { color: var(--blue); }
+
+@media (max-width: 767px) {
+  .articles-grid { grid-template-columns: 1fr; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   10C. FULL ARTICLES — the four field notes in full, each its own
+   anchor section: hero image, title, structured body.
+════════════════════════════════════════════════════════════════ */
+.article-full {
+  padding: var(--sp-7) 0;
+  border-top: 1px solid var(--rule);
+}
+.article-full .wrap { max-width: 880px; }
+.article-full-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--blue);
+  margin-bottom: var(--sp-2);
+}
+.article-full-title {
+  font-family: var(--font-serif);
+  font-size: clamp(1.8rem, 3.2vw, 2.6rem);
+  font-weight: 400;
+  line-height: 1.15;
+  margin-bottom: var(--sp-5);
+}
+.article-full-img {
+  display: block;
+  width: 100%;
+  height: clamp(220px, 34vw, 440px);
+  object-fit: cover;
+  border-radius: 4px;
+  margin-bottom: var(--sp-5);
+}
+.article-full-body h3 {
+  font-family: var(--font-serif);
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: var(--sp-5) 0 var(--sp-2);
+}
+.article-full-body h3:first-child { margin-top: 0; }
+.article-full-body p {
+  font-family: var(--font-serif);
+  font-size: 15.5px;
+  line-height: 1.78;
+  color: var(--ink);
+  margin-bottom: var(--sp-3);
+}
+.article-full-body ul,
+.article-full-body ol {
+  margin: 0 0 var(--sp-3);
+  padding-left: 1.3em;
+}
+.article-full-body ul { list-style: disc; }
+.article-full-body ol { list-style: decimal; }
+.article-full-body li {
+  font-family: var(--font-serif);
+  font-size: 15.5px;
+  line-height: 1.7;
+  margin-bottom: 0.55em;
+}
+.article-full-body strong { font-weight: 600; }
+.article-full-body blockquote {
+  margin: 0 0 var(--sp-3);
+  padding-left: 1.1em;
+  border-left: 3px solid var(--blue);
+  font-style: italic;
+  color: var(--muted);
+}
+.article-full-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  margin-top: var(--sp-3);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--blue);
+  text-decoration: none;
+}
+
+/* ══════════════════════════════════════════════════════════════
    11. TABLE OF CONTENTS
 ════════════════════════════════════════════════════════════════ */
 .toc-section-outer {
@@ -813,7 +1007,6 @@ header.site .wrap {
   align-items: start;
 }
 
-.toc-group {}
 .toc-group-title {
   font-family: var(--font-mono);
   font-size: 11px;
@@ -870,12 +1063,12 @@ header.site .wrap {
 }
 
 /* ══════════════════════════════════════════════════════════════
-   12. FOOTER — same arrangement as every other page: a centred
-   "Crafted at Twashta Labs" line first, then a copyright-left /
-   nav-list-and-logo-right row. Only the color tokens are Patra's own.
+   12. FOOTER — same arrangement as every other page: copyright on
+   top with "Crafted at Tvashta Labs" right below it, then a
+   nav-list-and-logo-right column. Only the color tokens are Patra's own.
 ════════════════════════════════════════════════════════════════ */
 footer.site {
-  padding: var(--sp-6) 0 var(--sp-5);
+  padding: var(--sp-6) var(--page-padding) var(--sp-5);
   border-top: 1px solid var(--rule);
   display: flex;
   flex-direction: column;
@@ -883,13 +1076,12 @@ footer.site {
   gap: var(--sp-4);
 }
 .foot-crafted {
-  order: -1;
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 700;
-  letter-spacing: .18em;
+  letter-spacing: .14em;
   text-transform: uppercase;
-  text-align: center;
+  text-align: left;
   color: var(--blue);
 }
 .footer-main {
@@ -909,10 +1101,9 @@ footer.site {
 }
 .footer-col--right {
   display: flex;
+  flex-direction: column;
   align-items: flex-end;
-  gap: 20px;
-  flex-wrap: wrap;
-  justify-content: flex-end;
+  gap: 14px;
 }
 .footer-nav {
   display: flex;
@@ -934,9 +1125,8 @@ footer.site {
 
 @media (max-width: 700px) {
   footer.site { align-items: flex-start; }
-  .foot-crafted { text-align: left; width: 100%; font-size: 11px; }
   .footer-main { flex-direction: column; align-items: flex-start; gap: 20px; }
-  .footer-col--right { align-items: flex-start; justify-content: flex-start; }
+  .footer-col--right { align-items: flex-start; }
   .footer-nav { align-items: flex-start; }
 }
 
@@ -996,27 +1186,31 @@ footer.site {
   </div>
 </div>
 
-<!-- ── Page navigation (top right) ─────────────────────────────────── -->
-<img id="site-logo" src="loading_images/5_cropped.png" alt="Banarasi Bhaukal">
+<!-- ── Top-right cluster: theme toggle + site logo, independent of the navbar ── -->
+<div id="top-controls">
+  <button id="theme-toggle" type="button" aria-pressed="false" aria-label="Switch to dark theme">
+    <span class="theme-icon theme-icon--sun active" aria-hidden="true">☀︎</span>
+    <span class="theme-icon theme-icon--moon" aria-hidden="true">☾</span>
+  </button>
+  <img id="site-logo" src="loading_images/5_cropped.png" alt="Banarasi Bhaukal">
+</div>
 
+<!-- ── Page navigation (top left) ─────────────────────────────────── -->
 <nav id="page-nav" aria-label="Page navigation">
   <button id="nav-toggle" class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
-    <span></span><span></span><span></span>
+    <img class="nav-toggle-icon" src="tripundra.webp" alt="">
   </button>
   <div class="page-nav-links">
-    <a href="page2.html" class="page-nav-link">Home</a>
+    <a href="index.html" class="page-nav-link">Home</a>
     <span class="page-nav-sep">|</span>
     <a href="explore-kashi.html" class="page-nav-link">Explore Kashi</a>
     <span class="page-nav-sep">|</span>
-    <a href="index.html" class="page-nav-link">Explore Ghats</a>
+    <a href="explore-ghats.html" class="page-nav-link">Explore Ghats</a>
     <span class="page-nav-sep">|</span>
     <span class="page-nav-link active" aria-current="page">Patra</span>
     <span class="page-nav-sep">|</span>
     <a href="about.html" class="page-nav-link">About</a>
   </div>
-  <button id="theme-toggle" type="button" aria-pressed="true">
-    <span class="theme-icon" aria-hidden="true">☀︎</span><span id="theme-toggle-label">Light</span>
-  </button>
 </nav>
 
 <div id="app">
@@ -1027,7 +1221,7 @@ footer.site {
       <h1 class="site-title" id="site-title">PATRA</h1>
       <div class="site-descriptor">
         The sacred objects that revolve around the Kashi temple — in gold line and story.<br>
-        <strong>पत्र · Banarasi Bhaukal.</strong>
+        <strong>पत्रा · Banarasi Bhaukal.</strong>
       </div>
     </div>
   </header>
@@ -1037,11 +1231,11 @@ footer.site {
     <div class="stipple-chars"></div>
   </div>
 
-  <!-- ══════════════════════════════════ HERO — FIG.01 BEL PATRA ══════════════════════════════════ -->
+  <!-- ══════════════════════════════════ HERO — FIG.01 BEL PATRA ══════════════════════════════════ 
   <section class="hero" id="fig-bel-patra">
     <div class="wrap">
 
-      <!-- LEFT — editorial body text -->
+      !-- LEFT — editorial body text 
       <div class="hero-editorial reveal">
         <span class="fig-label">FIG.01</span>
         <div class="hero-editorial-inner">
@@ -1057,7 +1251,7 @@ footer.site {
         </div>
       </div>
 
-      <!-- RIGHT — bel patra plate -->
+      !-- RIGHT — bel patra plate --
       <div class="hero-diagram-col reveal">
         <div class="hero-main-diagram grid-surface">
           <span class="fig-label" style="position:absolute;left:6px;top:50%;transform:translateY(-50%) rotate(180deg);writing-mode:vertical-rl;">FIG.01</span>
@@ -1070,18 +1264,18 @@ footer.site {
     </div>
   </section>
 
-  <!-- Stipple separator with title -->
+  !-- Stipple separator with title --
   <div class="stipple with-title" aria-hidden="true">
     <div class="stipple-chars"></div>
     <span class="stipple-title">Patra</span>
     <div class="stipple-chars"></div>
   </div>
 
-  <!-- ══════════════════════════════════ FIG.02 DAMROO ══════════════════════════════════ -->
+  !-- ══════════════════════════════════ FIG.02 DAMROO ══════════════════════════════════ --
   <section class="editorial" id="fig-damroo">
     <div class="wrap">
 
-      <!-- LEFT — damroo plate -->
+      !-- LEFT — damroo plate --
       <div class="ed-diagram reveal" style="position:relative;">
         <span class="fig-label">FIG.02</span>
         <div class="grid-surface" style="padding: var(--sp-5) var(--sp-4); display:flex; align-items:center; justify-content:center;">
@@ -1089,7 +1283,7 @@ footer.site {
         </div>
       </div>
 
-      <!-- RIGHT — editorial text -->
+      !-- RIGHT — editorial text --
       <div class="ed-text reveal">
         <div class="ed-section-label">░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░</div>
         <p class="ed-lead"><strong>डमरू · Damroo — the hourglass drum</strong></p>
@@ -1102,18 +1296,18 @@ footer.site {
     </div>
   </section>
 
-  <!-- Stipple separator with title -->
+  !-- Stipple separator with title --
   <div class="stipple with-title" aria-hidden="true">
     <div class="stipple-chars"></div>
     <span class="stipple-title">Patra</span>
     <div class="stipple-chars"></div>
   </div>
 
-  <!-- ══════════════════════════════════ FIG.03 DIYA ══════════════════════════════════ -->
+  !-- ══════════════════════════════════ FIG.03 DIYA ══════════════════════════════════ --
   <section class="early-access" id="fig-diya">
     <div class="wrap">
 
-      <!-- LEFT — diya plate -->
+      !-- LEFT — diya plate --
       <div class="ea-diagram reveal" style="position:relative;">
         <span class="fig-label">FIG.03</span>
         <div class="grid-surface" style="padding: var(--sp-5) var(--sp-4); display:flex; align-items:center; justify-content:center;">
@@ -1122,7 +1316,7 @@ footer.site {
         <span class="ea-subject-label">[ गंगा दीया — GANGA DIYA ]</span>
       </div>
 
-      <!-- RIGHT — text + link to 3D temple -->
+      !-- RIGHT — text + link to 3D temple --
       <div class="ea-text reveal">
         <h2 class="ea-heading">Ganga Diya</h2>
         <p class="ea-body">Each evening at Dashashwamedh Ghat, hundreds of earthen diyas are set upon the Ganga during the Aarti — each flame a small, floating prayer, ascending toward the infinite through fire and current. The clay comes from the Kumhar potters of Varanasi, shaped by hand for generations, unhurried and unbroken.</p>
@@ -1133,18 +1327,18 @@ footer.site {
     </div>
   </section>
 
-  <!-- Stipple separator with title -->
+  !-- Stipple separator with title --
   <div class="stipple with-title" aria-hidden="true">
     <div class="stipple-chars"></div>
     <span class="stipple-title">Patra</span>
     <div class="stipple-chars"></div>
   </div>
 
-  <!-- ══════════════════════════════════ FIG.04 BOAT ══════════════════════════════════ -->
+  !-- ══════════════════════════════════ FIG.04 BOAT ══════════════════════════════════ --
   <section class="editorial" id="fig-boat">
     <div class="wrap" style="grid-template-columns: minmax(0,3fr) minmax(0,2fr);">
 
-      <!-- LEFT — editorial text -->
+      !-- LEFT — editorial text --
       <div class="ed-text reveal" style="padding-left:0;">
         <div class="ed-section-label">░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░</div>
         <p class="ed-lead"><strong>नाव · The river boat</strong></p>
@@ -1153,7 +1347,7 @@ footer.site {
         <p class="ed-para"><a class="hl" href="index.html">See the ghats where these boats still gather →</a></p>
       </div>
 
-      <!-- RIGHT — boat plate -->
+      !-- RIGHT — boat plate --
       <div class="ed-diagram reveal" style="position:relative; padding-left:var(--sp-5);">
         <span class="fig-label">FIG.04</span>
         <div class="grid-surface" style="padding: var(--sp-5) var(--sp-4); display:flex; align-items:center; justify-content:center;">
@@ -1163,6 +1357,214 @@ footer.site {
 
     </div>
   </section>
+
+  !-- Stipple separator with title --
+  <div class="stipple with-title" aria-hidden="true">
+    <div class="stipple-chars"></div>
+    <span class="stipple-title">Patra</span>
+    <div class="stipple-chars"></div>
+  </div>
+
+  !-- ══════════════════════════════════ ARTICLES ══════════════════════════════════ -->
+  <section class="articles-section" id="articles">
+    <div class="wrap">
+
+      <div class="articles-header reveal">
+        <div class="ed-section-label">░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░</div>
+        <h2 class="articles-heading">Field notes from Kashi</h2>
+        <p class="articles-sub">Longer reads on the city beyond the four objects — festival, flavor, and the practical business of getting here and moving through it.</p>
+      </div>
+
+      <div class="articles-grid">
+        <a class="article-card reveal" href="#article-ramleela">
+          <img class="article-card-thumb" src="Ramleela.png" alt="" loading="lazy">
+          <span class="article-kicker">Culture · UNESCO Heritage</span>
+          <h3 class="article-title">Ramnagar's Ramlila</h3>
+          <p class="article-desc">A month-long, 31-day retelling of the Ramacharitmanas on the banks of the Ganga — living sets, royal patronage, and a tradition kept unbroken for well over a century.</p>
+          <span class="article-link">Read the article ↗</span>
+        </a>
+        <a class="article-card reveal" href="#article-malaiyo">
+          <img class="article-card-thumb" src="Malaiyo.png" alt="" loading="lazy">
+          <span class="article-kicker">Food · Winter Only</span>
+          <h3 class="article-title">From Dew to Delight: The Story of Malaiyo</h3>
+          <p class="article-desc">Milk, winter dew, and a night of patient churning — how Varanasi turns cold mornings into the city's most delicate dessert.</p>
+          <span class="article-link">Read the article ↗</span>
+        </a>
+        <a class="article-card reveal" href="#article-how-to-reach">
+          <img class="article-card-thumb" src="HTRV.png" alt="" loading="lazy">
+          <span class="article-kicker">Travel · Getting Here</span>
+          <h3 class="article-title">Road to Salvation</h3>
+          <p class="article-desc">A complete guide to reaching Varanasi by air, rail, and road — the airport, all four railway stations, and the highways and buses that lead here.</p>
+          <span class="article-link">Read the article ↗</span>
+        </a>
+        <a class="article-card reveal" href="#article-women-safety">
+          <img class="article-card-thumb" src="WSV.png" alt="" loading="lazy">
+          <span class="article-kicker">Travel · Solo Women</span>
+          <h3 class="article-title">Navigating the Spiritual Heart of India with Confidence</h3>
+          <p class="article-desc">Two solo women travellers on safety, hospitality, and what it actually feels like to explore Varanasi's ghats and lanes alone.</p>
+          <span class="article-link">Read the article ↗</span>
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════ ARTICLE: RAMLILA ══════════════════════════════════ -->
+  <article class="article-full reveal" id="article-ramleela">
+    <div class="wrap">
+      <p class="article-full-eyebrow">A UNESCO Masterpiece</p>
+      <h2 class="article-full-title">Ramnagar's Ramlila</h2>
+      <img class="article-full-img" src="Ramleela.png" alt="Ramnagar's Ramlila">
+      <div class="article-full-body">
+        <p>The Ramnagar Ramlila is not just a play, but an elaborate, month-long exploration of the epic Ramayana. Here is a closer look at what makes this event so exceptional.</p>
+
+        <h3>The Month-Long Show</h3>
+        <p>In contrast to most Ramlilas, which typically run for one or two weeks, the performance in Ramnagar stretches out for a complete 31 days. This allows a thorough staging of the entire Ramacharitmanas, Tulsidas's Hindi retelling of the Ramayana. Every day brings a new part of the story — from Rama's birth and coronation to his banishment, Sita's abduction, the fierce battle with Ravana, and his victorious homecoming to Ayodhya.</p>
+
+        <h3>The Sets of Ramlila as Living History</h3>
+        <p>Ramnagar transforms into a living stage. The banks of the Ganges become the different settings of the Ramayana in turn. Fixed sets portray well-known locations such as Ayodhya (with its lofty palace), Janakpuri (Sita's birthplace), Lanka (Ravana's demon kingdom), Panchavati (where Rama lives in exile), and Ashok Vatika (where Sita is held captive). Embellished with vivid colours and detailed craftsmanship, the sets immerse the audience in the story.</p>
+
+        <h3>From Script to Soul</h3>
+        <p>The Swarupas — the actors — train intensely for months before the Ramlila begins. They are more than performers; they become the characters they depict. The commitment goes beyond learning lines: some Swarupas mirror the mannerisms and behaviour of their characters even while getting ready, bringing an unmatched authenticity to the performance.</p>
+
+        <h3>A Sensory Banquet</h3>
+        <p>The Ramlila is a sensory-rich experience, not just a visual one. Traditional costumes with elaborate jewellery and rich fabrics bring the characters to life. Live music — devotional songs and intense war chants — underscores the action, while a designated narrator, the Vyas, recites verses from the Ramacharitmanas throughout.</p>
+
+        <h3>A Royal Influence</h3>
+        <p>The Varanasi royal family plays a central role in the Ramlila. The Maharaja actively oversees the organisation and takes part in daily rituals as its chief patron. Notably, tradition holds that the Maharaja does not watch the final battle scene (Ravana Vadh), out of respect for the death of another king — a detail that adds a layer of royal gravity to the occasion.</p>
+
+        <h3>A Legacy Preserved</h3>
+        <p>The Ramnagar Ramlila is more than entertainment — it is a living example of India's tradition of storytelling. The careful preservation of ancient practices, the emphasis on oral narration, and the dedication to traditional dress and music connect history to the present. It is this commitment to preserving cultural heritage that earned the Ramlila its UNESCO recognition.</p>
+
+        <h3>Planning Your Visit</h3>
+        <ul>
+          <li><strong>Dates:</strong> The Ramlila typically runs over 31 days in September and October — confirm the exact dates before finalising travel plans.</li>
+          <li><strong>Accommodation:</strong> Varanasi offers everything from budget guesthouses to luxury hotels; book well in advance, especially during the Ramlila period.</li>
+          <li><strong>Essentials:</strong> Comfortable walking shoes, light clothing for warm weather, a scarf or shawl for temple visits, and a reusable water bottle.</li>
+        </ul>
+
+        <h3>Experiencing the Ramlila</h3>
+        <ul>
+          <li><strong>Locations:</strong> Performances take place across several sites on the banks of the Ganges, including Ramnagar Fort and Lanka Maidan (representing Ravana's kingdom).</li>
+          <li><strong>Timings:</strong> Performances typically begin in the evening, after sunset, with exact timings varying by the day's programme.</li>
+          <li><strong>Ambiance:</strong> Expect a vibrant, energetic atmosphere — large crowds gather in shared devotion and celebration.</li>
+          <li><strong>Respecting traditions:</strong> Dress modestly and be mindful of local customs; photography is usually allowed, but avoid flash during performances.</li>
+          <li><strong>Language:</strong> Hindi is the primary language used, though some organisers offer translated programmes — worth asking about in advance.</li>
+        </ul>
+      </div>
+      <a class="article-full-back" href="#articles"><span aria-hidden="true">←</span> Back to Field Notes</a>
+    </div>
+  </article>
+
+  <!-- ══════════════════════════════════ ARTICLE: MALAIYO ══════════════════════════════════ -->
+  <article class="article-full reveal" id="article-malaiyo">
+    <div class="wrap">
+      <p class="article-full-eyebrow">Unveiling Varanasi's Ethereal Winter Dessert</p>
+      <h2 class="article-full-title">From Dew to Delight: The Story of Malaiyo</h2>
+      <img class="article-full-img" src="Malaiyo.png" alt="Malaiyo served in earthenware cups">
+      <div class="article-full-body">
+        <p>Varanasi, the city of ancient temples and vibrant spiritual traditions, also holds a unique culinary treasure: Malaiyo. This ethereal dessert, enjoyed only during the winter months, holds a special place in the hearts of locals and visitors alike.</p>
+
+        <h3>A Delicate Creation</h3>
+        <p>Malaiyo translates to "cream" in Hindi, aptly describing its key ingredient. Unlike its richer cousin, Rabdi, Malaiyo has a lighter, airier texture, closer to whipped cream — the result of a meticulous process that leans heavily on the natural elements.</p>
+
+        <h3>The Art of Making Malaiyo</h3>
+        <ol>
+          <li><strong>The dance of dew:</strong> Preparation begins the evening before, with full-cream milk boiled in large open vessels. Left overnight under the open sky, the cool winter dew settles on the milk's surface — a step believed to give Malaiyo its characteristic frothiness.</li>
+          <li><strong>Dawn of churning:</strong> Early the next morning, skilled hands churn the milk with a traditional wooden churner for several hours, working it into a light, fluffy foam.</li>
+          <li><strong>A touch of sweetness:</strong> Once the texture is right, sugar is added to taste along with cardamom powder and saffron for warmth and aroma.</li>
+          <li><strong>Garnishing for elegance:</strong> Malaiyo is served in small earthenware cups, often finished with chopped pistachios and almonds for visual appeal and texture.</li>
+        </ol>
+
+        <h3>A Seasonal Delight</h3>
+        <p>The delicacy of the process makes Malaiyo a strictly seasonal treat, available only from November to March. Its reliance on natural dew and its time-consuming, manual preparation keep it limited — and all the more cherished by those who catch it in season.</p>
+
+        <h3>A Cultural Experience</h3>
+        <p>Savouring Malaiyo is more than a culinary moment; it's a window into Varanasi's cultural heritage and the resourcefulness of its people — a flavour drawn directly from local tradition and a skilful interplay with nature's elements.</p>
+
+        <h3>A Bite of History</h3>
+        <p>Malaiyo's exact origins remain unclear, though its presence in Varanasi goes back generations. Some trace it to the Mughal era, others to Maratha influence. Whatever its beginning, Malaiyo has become an inseparable part of Varanasi's culinary landscape.</p>
+
+        <h3>Where to Find It</h3>
+        <p>Malaiyo is available throughout Varanasi during winter, but a few spots are especially known for it:</p>
+        <ul>
+          <li><strong>Markandey Ki Malaiyo, Chaukhamba Gali</strong> — opposite Gopal Ji Mandir, known for authentic, traditionally prepared Malaiyo; seating can be limited and it gets crowded during peak hours.</li>
+          <li><strong>Shreeji Sweets &amp; Milk, Chaukhamba</strong> — in Garwasi Tola, a well-known name for traditional sweets and snacks, and a must-visit for Malaiyo.</li>
+          <li><strong>Pehlwan Lassi, Lanka</strong> — at Ravidas Chauraha on Lanka Road, serving hand-whipped Lassi and Malaiyo in kulhads in its traditional style since 1950.</li>
+        </ul>
+        <p><strong>Pro-tip:</strong> arrive early — this delicacy often sells out quickly.</p>
+      </div>
+      <a class="article-full-back" href="#articles"><span aria-hidden="true">←</span> Back to Field Notes</a>
+    </div>
+  </article>
+
+  <!-- ══════════════════════════════════ ARTICLE: HOW TO REACH ══════════════════════════════════ -->
+  <article class="article-full reveal" id="article-how-to-reach">
+    <div class="wrap">
+      <p class="article-full-eyebrow">Your Complete Guide to Reaching Varanasi</p>
+      <h2 class="article-full-title">Road to Salvation</h2>
+      <img class="article-full-img" src="HTRV.png" alt="Traditional boat on the Ganga at Varanasi">
+      <div class="article-full-body">
+        <p>Varanasi, known as Kashi, showcases India's spiritual essence, nestled by the sacred Ganges. It stands as one of the world's oldest cities, resonating with centuries of spiritual, cultural, and historical significance — its ancient temples and lively ghats drawing pilgrims and travellers every year.</p>
+        <p>Known also as Avimukta and Anandavana, and held to be the home of Lord Shiva, Varanasi is equally a hub of everyday cultural life — narrow lanes full of sights, sounds, and scents, bustling markets of silk sarees and handicrafts, and the aroma of street food carried through the air.</p>
+
+        <h3>Flying In: Lal Bahadur Shastri International Airport</h3>
+        <p>Located in Babatpur, about 26 kilometres northwest of the city, Varanasi's airport handles both domestic and international flights, connecting to Delhi, Mumbai, Kolkata, and Bengaluru, as well as international destinations such as Kathmandu, Sharjah, and Bangkok. A single integrated terminal serves domestic and international travellers alike, with restaurants, shops, lounges, and car rental services on site.</p>
+
+        <h3>By Train: Four Stations Serve the City</h3>
+        <ol>
+          <li><strong>Varanasi Junction (BSB)</strong> — also called Varanasi Cantt, this is the city's main railway hub, offering connections to major Indian cities along with waiting areas, overnight accommodation, food stalls, banking services, parking, and medical assistance.</li>
+          <li><strong>Banaras Railway Station (BSBS)</strong> — also known as Manduadih, located 4 km from the city centre. A historical station with 5 platforms, waiting rooms, and refreshment stalls, offering express and passenger trains — often at lower fares than Varanasi Junction.</li>
+          <li><strong>Kashi Railway Station (KEI)</strong> — 5 km from the city centre, a smaller station with fewer amenities, mainly serving passenger trains to nearby towns.</li>
+          <li><strong>Pandit Deen Dayal Upadhyaya Junction (DDU)</strong> — also known as Mughalsarai Junction, 18 km from the city centre. An important hub connecting northern and eastern India, with multiple platforms, waiting rooms, cloakrooms, refreshment stalls, and a prepaid taxi booth — best suited to travellers willing to go further out for more train options or cheaper fares.</li>
+        </ol>
+
+        <h3>The Road to Reverence: By Road</h3>
+        <p>Varanasi is well-connected by road to major cities in Uttar Pradesh and neighbouring states, with highways NH 19 and NH 31 passing through or near the city, and the Eastern Peripheral and Purvanchal Expressways offering faster travel from Delhi. Travel time ranges from 4–6 hours from nearby cities to 10–12 hours from Delhi or Kolkata, with road conditions varying from well-maintained highways to narrow, bumpy stretches, and roadside eateries and fuel stations along the way.</p>
+
+        <h3>In Transit: By Bus</h3>
+        <p>Buses offer a convenient, budget-friendly route into the city. The Chaudhary Charan Singh Bus Stand, roughly 1 km from Varanasi Railway Station, connects to major cities in Uttar Pradesh and neighbouring states via state-run and private operators. Journeys from nearby cities like Allahabad or Lucknow take about 4–6 hours, while trips from Delhi or Kolkata can take 10–12 hours — booking ahead is recommended during peak travel times.</p>
+
+        <p>Whether you arrive by air, train, or road, the journey to Varanasi is as enriching as the destination itself.</p>
+      </div>
+      <a class="article-full-back" href="#articles"><span aria-hidden="true">←</span> Back to Field Notes</a>
+    </div>
+  </article>
+
+  <!-- ══════════════════════════════════ ARTICLE: WOMEN SAFETY ══════════════════════════════════ -->
+  <article class="article-full reveal" id="article-women-safety">
+    <div class="wrap">
+      <p class="article-full-eyebrow">Is Varanasi Safe for Solo Women Travellers?</p>
+      <h2 class="article-full-title">Navigating the Spiritual Heart of India with Confidence</h2>
+      <img class="article-full-img" src="WSV.png" alt="A solo woman traveller by the Ganga ghats">
+      <div class="article-full-body">
+        <p>Varanasi, often called Banaras or Kashi, is a city that epitomises the soul of India — radiating spirituality, culture, and history. For solo women travellers, its winding alleys, bustling ghats, and vibrant streets make for a transformative journey. Here, two solo travellers, Garima Raheja from Delhi and Megha Raikwar from Madhya Pradesh, share their experiences of navigating the city.</p>
+
+        <h3>Embracing Safety and Comfort: Garima's Sojourn</h3>
+        <p>Garima Raheja, a seasoned solo traveller, has returned to Varanasi many times and speaks to the city's strong focus on safety and its abundance of women-friendly stays:</p>
+        <blockquote>"When I visited Banaras for the very first time in 2018, I looked for some female-friendly accommodations. Lately, I have realized all the accommodations, be it hostels, hotels, or dormitories — all these sorts of stays are female-friendly, well-organized, safe, and you can be at ease all the time. I have been visiting this city quite periodically now and I have never encountered any situation where my safety is being compromised."</blockquote>
+        <p>She credits the warmth of local hospitality for building a sense of trust, and — despite the occasional unwanted encounter — describes Varanasi as a place of safety and welcome for solo women seeking peace and spiritual renewal.</p>
+
+        <h3>Navigating Unpredictability with Grace: Megha's Adventure</h3>
+        <p>Megha Raikwar took a spontaneous trip to Varanasi during the Dev Deepawali festival in 2022:</p>
+        <blockquote>"Being a solo traveller, I have always wanted to visit Kashi. And randomly one day in 2022, I decided to pack my bags off to Varanasi... With all the fear and excitement in my heart, I landed up here. My first encounter at this place happened to be with my taxi bhaiya, who seems to be a very chatty person. Being a responsible, alone female, I tried to avoid the conversations in the beginning. However, as we were passing through the lanes and streets of Banaras, this bhaiya gave me a proper guide and all the necessary details I was looking for, thus giving me a sense of familiarity."</blockquote>
+        <p>Despite some difficulty finding accommodation, she leaned on local kindness and helpful auto drivers throughout her stay — her impromptu journey a reminder that solo travel means embracing the unexpected with resilience.</p>
+
+        <h3>Savoring Spiritual Serenity</h3>
+        <p>Both travellers' stories converge on the same spiritual core of the city — the chants of hymns and the glow of the Ganga Aarti at dusk offering solace despite the bustling streets. Whether meditating by the Ganges or receiving blessings at ancient temples, Varanasi offers solo women travellers a safe space for contemplation and connection.</p>
+
+        <h3>Cultivating Cultural Connections</h3>
+        <p>Beyond its spiritual pull, Varanasi invites deeper engagement with its culture — lively markets of textiles and handicrafts, street food, local artisans, and traditional ceremonies all offering a fuller understanding of the city's living heritage.</p>
+
+        <h3>Navigating Challenges with Resilience</h3>
+        <p>Solo travel here, as anywhere, comes with its own challenges — language barriers, cultural differences, and the everyday logistics of getting around. Garima and Megha's shared advice: stay vigilant, keep situational awareness, and don't hesitate to seek help from locals and fellow travellers when needed.</p>
+
+        <h3>Conclusion</h3>
+        <p>For solo women travellers seeking adventure, enlightenment, and cultural immersion, Varanasi offers its timeless charm, spiritual serenity, and vibrant cultural life in equal measure. Garima and Megha's experiences show what's possible when curiosity meets preparedness — a journey through Varanasi's ghats and lanes met with confidence rather than hesitation.</p>
+      </div>
+      <a class="article-full-back" href="#articles"><span aria-hidden="true">←</span> Back to Field Notes</a>
+    </div>
+  </article>
 
   <!-- ══════════════════════════════════ TABLE OF CONTENTS ══════════════════════════════════ -->
   <section class="toc-section-outer" id="contents">
@@ -1182,23 +1584,23 @@ footer.site {
   </section>
 
   <!-- ══════════════════════════════════ FOOTER ══════════════════════════════════ -->
-  <!-- Same arrangement as every other page: crafted-line centred on top,
-       then copyright-left / nav-and-logo-right. -->
+  <!-- Same arrangement as every other page: copyright on top with the
+       crafted-line right below it, then logo-above-nav on the right. -->
   <footer class="site" id="site-footer">
-    <p class="foot-crafted">Crafted at Twashta Labs</p>
     <div class="footer-main">
       <div class="footer-col--left">
         <p class="footer-copy">© 2026 Banarasi Bhaukal. All rights reserved.</p>
+        <p class="foot-crafted">Crafted at Tvashta Labs</p>
       </div>
       <div class="footer-col--right">
+        <img class="footer-logo" src="loading_images/5_cropped.png" alt="Banarasi Bhaukal logo">
         <nav class="footer-nav" aria-label="Footer navigation">
-          <a href="page2.html">Home</a>
+          <a href="index.html">Home</a>
           <a href="explore-kashi.html">Explore Kashi</a>
-          <a href="index.html">Explore Ghats</a>
+          <a href="explore-ghats.html">Explore Ghats</a>
           <a href="patra.html">Patra</a>
           <a href="about.html">About</a>
         </nav>
-        <img class="footer-logo" src="loading_images/5_cropped.png" alt="Banarasi Bhaukal logo">
       </div>
     </div>
   </footer>
@@ -1247,10 +1649,16 @@ const TOC = [
     { name: "Ganga Diya — the river's lamp.",      href: "#fig-diya" },
     { name: "The river boat.",                     href: "#fig-boat" },
   ]},
+  { title: "Field Notes", chapters: [
+    { name: "Ramnagar's Ramlila.",                href: "#article-ramleela" },
+    { name: "Malaiyo — from dew to delight.",     href: "#article-malaiyo" },
+    { name: "Road to Salvation — getting here.",  href: "#article-how-to-reach" },
+    { name: "Solo women, navigating with confidence.", href: "#article-women-safety" },
+  ]},
   { title: "Elsewhere in Kashi", chapters: [
     { name: "Explore Kashi — the 3D temple.", href: "explore-kashi.html" },
-    { name: "Home — the ghats, scrolling.",   href: "page2.html" },
-    { name: "Explore Ghats.",                 href: "index.html" },
+    { name: "Home.",                          href: "index.html" },
+    { name: "Explore Ghats — the ghats, scrolling.", href: "explore-ghats.html" },
     { name: "About Banarasi Bhaukal.",        href: "about.html" },
   ]},
 ];
@@ -1273,6 +1681,10 @@ const TOC = [
     section.chapters.forEach(ch => {
       const row = document.createElement("a");
       row.href = ch.href;
+      if (/\.pdf$/i.test(ch.href)) {
+        row.target = "_blank";
+        row.rel = "noopener";
+      }
       row.className = "toc-chapter-row no-count";
 
       const bullet = document.createElement("span");
@@ -1301,23 +1713,19 @@ const TOC = [
    THEME TOGGLE — light (original) / dark (golden), persisted
 ════════════════════════════════════════════════════════════════ */
 (function () {
-  const root  = document.documentElement;
-  const btn   = document.getElementById("theme-toggle");
-  const icon  = btn.querySelector(".theme-icon");
-  const label = document.getElementById("theme-toggle-label");
+  const root = document.documentElement;
+  const btn  = document.getElementById("theme-toggle");
+  const sun  = btn.querySelector(".theme-icon--sun");
+  const moon = btn.querySelector(".theme-icon--moon");
 
   function apply(theme) {
-    if (theme === "dark") {
-      root.setAttribute("data-theme", "dark");
-      icon.textContent = "☾";
-      label.textContent = "Dark";
-      btn.setAttribute("aria-pressed", "true");
-    } else {
-      root.removeAttribute("data-theme");
-      icon.textContent = "☀︎";
-      label.textContent = "Light";
-      btn.setAttribute("aria-pressed", "false");
-    }
+    const isDark = theme === "dark";
+    if (isDark) root.setAttribute("data-theme", "dark");
+    else root.removeAttribute("data-theme");
+    sun.classList.toggle("active", !isDark);
+    moon.classList.toggle("active", isDark);
+    btn.setAttribute("aria-pressed", String(isDark));
+    btn.setAttribute("aria-label", isDark ? "Switch to light theme" : "Switch to dark theme");
   }
 
   let saved = null;

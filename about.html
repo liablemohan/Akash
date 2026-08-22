@@ -187,13 +187,9 @@
         height: 50vh;
         margin: 0;
         overflow: hidden;
-        /* A blurred, darkened copy of the same photo fills the band behind
-           it, so the letterboxed edges (needed to show the full portrait,
-           uncropped, in a landscape band) read as intentional rather than
-           empty space. */
-        background-image: linear-gradient(rgba(12, 8, 5, 0.55), rgba(12, 8, 5, 0.55)), url('assets/akash-bio-mono.png');
-        background-size: cover;
-        background-position: center 20%;
+        /* Plain dark fill behind the contained portrait — no blurred photo
+           echo in the letterboxed edges. */
+        background: var(--bg-color);
       }
 
       .about-image-col img {
@@ -238,14 +234,14 @@
 
   <nav id="page-nav" aria-label="Page navigation">
     <button id="nav-toggle" class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
-      <span></span><span></span><span></span>
+      <img class="nav-toggle-icon" src="tripundra.webp" alt="">
     </button>
     <div class="page-nav-links">
-      <a href="page2.html" class="page-nav-link">Home</a>
+      <a href="index.html" class="page-nav-link">Home</a>
       <span class="page-nav-sep">|</span>
       <a href="explore-kashi.html" class="page-nav-link">Explore Kashi</a>
       <span class="page-nav-sep">|</span>
-      <a href="index.html" class="page-nav-link">Explore Ghats</a>
+      <a href="explore-ghats.html" class="page-nav-link">Explore Ghats</a>
       <span class="page-nav-sep">|</span>
       <a href="patra.html" class="page-nav-link">Patra</a>
       <span class="page-nav-sep">|</span>
@@ -265,7 +261,7 @@
 
       <div class="about-text-col">
         <span class="about-eyebrow">The voice behind the page</span>
-        <h1 class="about-title">About <span class="accent">Banarasi Bhaukal</span></h1>
+        <h1 class="about-title">About <br><span class="accent">Banarasi Bhaukal</span></h1>
         <p class="about-subtitle">Akash Choudhary</p>
 
         <p class="about-copy">I'm the voice behind Banarasi Bhaukal.</p>
@@ -305,20 +301,20 @@
 
   <!-- ── Footer ───────────────────────────────────────────────────────── -->
   <footer id="site-footer">
-    <p class="foot-crafted">Crafted at Twashta Labs</p>
     <div class="footer-main">
       <div class="footer-col--left">
         <p class="footer-copy">© 2026 Banarasi Bhaukal. All rights reserved.</p>
+        <p class="foot-crafted">Crafted at Tvashta Labs</p>
       </div>
       <div class="footer-col--right">
+        <img class="footer-logo" src="loading_images/5_cropped.png" alt="Banarasi Bhaukal logo">
         <nav class="footer-nav" aria-label="Footer navigation">
-          <a href="page2.html">Home</a>
+          <a href="index.html">Home</a>
           <a href="explore-kashi.html">Explore Kashi</a>
           <a href="index.html">Explore Ghats</a>
           <a href="patra.html">Patra</a>
           <a href="about.html">About</a>
         </nav>
-        <img class="footer-logo" src="loading_images/5_cropped.png" alt="Banarasi Bhaukal logo">
       </div>
     </div>
   </footer>

@@ -2,6 +2,7 @@
 .DS_Store
 .AppleDouble
 .LSOverride
+*.md
 
 # Frame directories (too large for git/GitHub)
 frames/

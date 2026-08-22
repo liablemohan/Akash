@@ -11,14 +11,14 @@
   top: 3vh;
   right: 4.5vw;
   z-index: 55;
-  height: 34px;
+  height: 75px;
   width: auto;
   display: block;
   filter: drop-shadow(0 0 10px rgba(244, 185, 66, 0.3));
 }
 
 @media (max-width: 900px) {
-  #site-logo { top: 2.2vh; right: 5vw; height: 27px; }
+  #site-logo { top: 1.4vh; right: 5vw; height: 45px; }
 }
 
 /* ── Page navigation (top left) ───────────────────────────────────── */
@@ -81,34 +81,28 @@
   }
 }
 
-/* ── Mobile hamburger toggle ("tripundra" 3-line icon) ─────────────── */
+/* ── Mobile hamburger toggle — the tripundra mark itself ─────────────── */
 .nav-toggle {
   display: none;
-  flex-direction: column;
-  justify-content: center;
   align-items: center;
-  gap: 5px;
-  width: 26px;
-  height: 26px;
+  justify-content: center;
+  width: 30px;
+  height: 22px;
   background: none;
   border: none;
   padding: 0;
-  margin-right: 4px;
   cursor: pointer;
 }
 
-.nav-toggle span {
+.nav-toggle-icon {
   display: block;
-  width: 20px;
-  height: 2px;
-  border-radius: 2px;
-  background: var(--gold, var(--accent));
-  transition: transform 0.3s var(--ease-out-cubic, ease), opacity 0.25s ease;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: transform 0.3s var(--ease-out-cubic, ease);
 }
 
-.nav-toggle[aria-expanded="true"] span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-.nav-toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
-.nav-toggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+.nav-toggle[aria-expanded="true"] .nav-toggle-icon { transform: rotate(90deg); }
 
 /* On desktop the links sit inline as direct flex children of #page-nav. */
 .page-nav-links { display: contents; }
@@ -116,14 +110,32 @@
 @media (max-width: 900px) {
   .nav-toggle { display: flex; }
 
-  #page-nav { align-items: center; }
+  /* Collapsed = a plain circle around just the hamburger; opening
+     restores the familiar pill shape and padding. */
+  #page-nav {
+    align-items: center;
+    justify-content: center;
+    flex-wrap: nowrap;
+    gap: 0;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border-radius: 50%;
+  }
+  #page-nav.nav-open {
+    width: auto;
+    height: auto;
+    padding: 0.4rem 0.85rem;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
 
   .page-nav-links {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: 13px;
-    width: 100%;
+    width: 0;
     max-height: 0;
     overflow: hidden;
     opacity: 0;
@@ -132,7 +144,8 @@
   }
 
   .page-nav-links.open {
-    max-height: 60vh;
+    width: 100%;
+    max-height: 320px;
     opacity: 1;
     pointer-events: auto;
     margin-top: 12px;
@@ -655,6 +668,38 @@ html, body {
   margin: 0;
 }
 
+/* ── Featured "from Patra" excerpt card — image + title + excerpt + CTA ── */
+.article-card--featured {
+  display: block;
+  padding: 0;
+  overflow: hidden;
+  text-decoration: none;
+}
+.article-card-img {
+  display: block;
+  width: 100%;
+  height: 130px;
+  object-fit: contain;
+  background: rgba(244, 185, 66, 0.07);
+  padding: 0.9rem;
+}
+.article-card--featured .article-title { padding: 0.9rem 1.25rem 0; }
+.article-card--featured .article-desc  { padding: 0.5rem 1.25rem 0; }
+.article-readmore {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0.9rem 1.25rem 1.1rem;
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold);
+  transition: gap 0.2s ease;
+}
+.article-card--featured:hover .article-readmore { gap: 0.65rem; }
+
 /* ── Right object label panel (PRD §10) ───────────────────────── */
 #object-panel {
   position: absolute;
@@ -907,16 +952,15 @@ html, body {
   border-top: 1px solid rgba(244, 185, 66, 0.16);
 }
 
-/* "Crafted at Twashta Labs" — the most prominent line in the footer,
-   centred above everything else. */
+/* "Crafted at Tvashta Labs" — sits directly under the copyright line
+   in the left column, not centred above everything anymore. */
 .foot-crafted {
-  order: -1;
   font-family: var(--font-body, 'Outfit', sans-serif);
-  font-size: 15px;
+  font-size: 12px;
   font-weight: 600;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  text-align: center;
+  text-align: left;
   color: var(--gold, var(--accent));
 }
 
@@ -947,10 +991,9 @@ html, body {
 
 .footer-col--right {
   display: flex;
+  flex-direction: column;
   align-items: flex-end;
-  gap: 20px;
-  flex-wrap: wrap;
-  justify-content: flex-end;
+  gap: 16px;
 }
 
 /* Vertical list format, per spec */
@@ -987,9 +1030,7 @@ html, body {
     gap: 24px;
     min-height: auto;
   }
-  /* On phone, the crafted-by line comes first, full width, left-aligned */
-  .foot-crafted { text-align: left; width: 100%; font-size: 13px; }
   .footer-main { flex-direction: column; align-items: flex-start; gap: 24px; }
-  .footer-col--right { align-items: flex-start; justify-content: flex-start; }
+  .footer-col--right { align-items: flex-start; }
   .footer-nav { align-items: flex-start; }
 }
